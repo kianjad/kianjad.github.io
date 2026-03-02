@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Soda Taste Test | Kian Jadbabaei</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+
+    /* ── Hero ── */
+    .proj-hero {
+      background: var(--ink);
+      padding: 80px 0 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .proj-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 90% 30%, rgba(196,75,43,0.14), transparent);
+    }
+    .proj-hero-inner {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: end;
+    }
+    .proj-eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .proj-tag-dark {
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); background: rgba(196,75,43,0.12); border: 1px solid rgba(196,75,43,0.3);
+      padding: 4px 10px; border-radius: 2px;
+    }
+    .proj-date-dark { font-size: 0.78rem; color: rgba(255,255,255,0.35); font-weight: 500; }
+    .proj-hero h1 {
+      font-family: var(--serif); font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+      color: #fff; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; font-style: normal;
+    }
+    .proj-hero-desc {
+      font-size: 1rem; color: rgba(255,255,255,0.55); font-weight: 300;
+      max-width: 62ch; line-height: 1.65; margin-bottom: 24px;
+    }
+    .proj-hero-skills { display: flex; flex-wrap: wrap; gap: 7px; }
+    .proj-hero-skills span {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 4px 10px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 2px; color: rgba(255,255,255,0.5);
+    }
+    .proj-hero-stats { display: flex; flex-direction: column; gap: 20px; text-align: right; }
+    .proj-hero-stat-num {
+      font-family: var(--serif); font-size: 2.2rem; color: var(--accent); line-height: 1; display: block;
+    }
+    .proj-hero-stat-label {
+      font-size: 0.67rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); display: block; margin-top: 2px;
+    }
+
+    /* ── Tabs ── */
+    .proj-tabs {
+      background: var(--white); border-bottom: 1px solid var(--border);
+      position: sticky; top: 64px; z-index: 50;
+    }
+    .proj-tabs-inner { display: flex; }
+    .proj-tab {
+      background: none; border: none; padding: 16px 22px;
+      font-family: var(--sans); font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3);
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .proj-tab:hover { color: var(--ink); }
+    .proj-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .proj-tab-panel { display: none; padding: 56px 0; }
+    .proj-tab-panel.active { display: block; }
+
+    /* ── Layout ── */
+    .two-up   { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .three-up { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 48px; }
+    .five-up  { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 48px; }
+
+    .section-label {
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px; display: block;
+    }
+
+    /* ── Prose ── */
+    .prose h3 {
+      font-family: var(--serif); font-size: 1.25rem; letter-spacing: -0.01em; margin: 28px 0 10px;
+    }
+    .prose h3:first-child { margin-top: 0; }
+    .prose p { font-size: 0.92rem; color: var(--ink-2); font-weight: 300; line-height: 1.72; margin-bottom: 14px; }
+    .prose strong { color: var(--ink); font-weight: 600; }
+    .prose ol { font-size: 0.92rem; color: var(--ink-2); font-weight: 300; line-height: 1.8; padding-left: 20px; margin-bottom: 14px; }
+
+    /* ── Stat cards ── */
+    .stat-card {
+      background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+      padding: 20px; text-align: center;
+    }
+    .stat-card-val { font-family: var(--serif); font-size: 1.8rem; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+    .stat-card-val.accent { color: var(--accent); }
+    .stat-card-label { font-size: 0.67rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+    .stat-card-sub { font-size: 0.72rem; color: var(--ink-3); }
+
+    /* ── Finding cards ── */
+    .finding-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 6px; padding: 22px; border-top: 3px solid var(--accent);
+    }
+    .finding-card-label { font-size: 0.67rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .finding-card-val { font-family: var(--serif); font-size: 1.25rem; color: var(--ink); margin-bottom: 8px; line-height: 1.2; }
+    .finding-card-desc { font-size: 0.82rem; color: var(--ink-3); font-weight: 400; line-height: 1.55; }
+
+    /* ── Design diagram ── */
+    .design-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0 28px; }
+    .design-factor { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; }
+    .design-factor-title { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+    .design-factor-levels { display: flex; flex-direction: column; gap: 5px; }
+    .design-level {
+      font-size: 0.83rem; font-weight: 500; color: var(--ink); padding: 5px 11px;
+      background: var(--cream); border-radius: 3px; border-left: 3px solid var(--accent);
+    }
+
+    /* ── Tables ── */
+    .data-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      background: var(--cream); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--ink-3); padding: 11px 16px;
+      text-align: left; border-bottom: 1px solid var(--border);
+    }
+    .data-table td { font-size: 0.85rem; padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--ink-2); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td.hi { color: var(--ink); font-weight: 700; }
+    .data-table td.lo { color: var(--ink-3); }
+
+    .bar-cell { display: flex; align-items: center; gap: 8px; }
+    .bar { height: 6px; border-radius: 3px; background: var(--accent); flex-shrink: 0; }
+    .bar.dim { background: rgba(100,100,100,0.2); }
+
+    /* ── Viz cards ── */
+    .viz-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .viz-card img { width: 100%; display: block; }
+    .viz-card-caption { padding: 12px 16px; background: var(--cream); border-top: 1px solid var(--border); }
+    .viz-card-caption strong { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink); display: block; margin-bottom: 4px; }
+    .viz-card-caption p { font-size: 0.78rem; color: var(--ink-3); font-weight: 400; line-height: 1.5; margin: 0; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block; font-size: 0.65rem; font-weight: 800;
+      letter-spacing: 0.05em; padding: 2px 7px; border-radius: 2px;
+    }
+    .badge.yes { background: rgba(26,138,68,0.1); color: #1a8a44; }
+    .badge.no  { background: rgba(100,100,100,0.08); color: var(--ink-3); }
+    .badge.pref { background: rgba(26,138,68,0.1); color: #1a8a44; }
+    .t-sig  { color: #1a8a44; font-weight: 700; }
+    .t-mute { color: var(--ink-3); }
+
+    /* ── Assumption cards ── */
+    .assumption-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin: 20px 0 32px; }
+    .assumption-card { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 18px; }
+    .assumption-icon { font-size: 1.3rem; margin-bottom: 8px; display: block; }
+    .assumption-name { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 5px; }
+    .assumption-result { font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
+    .assumption-result.fail { color: var(--accent); }
+    .assumption-result.pass { color: #1a8a44; }
+    .assumption-result.warn { color: #c49a3c; }
+    .assumption-desc { font-size: 0.78rem; color: var(--ink-3); line-height: 1.5; }
+
+    /* ── Code ── */
+    .code-layout { display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: start; }
+    .code-file-list { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 140px; }
+    .code-file-btn {
+      background: none; border: 1px solid var(--border); border-radius: 4px; padding: 9px 12px;
+      text-align: left; font-family: 'Courier New', monospace; font-size: 0.75rem; font-weight: 600;
+      color: var(--ink-3); cursor: pointer; transition: all 0.15s;
+    }
+    .code-file-btn:hover { color: var(--ink); border-color: rgba(26,22,18,0.3); }
+    .code-file-btn.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+    .code-panel { display: none; }
+    .code-panel.active { display: block; }
+    .code-desc {
+      font-size: 0.88rem; color: var(--ink-2); font-weight: 300; line-height: 1.65;
+      margin-bottom: 16px; padding: 14px 16px; background: var(--cream);
+      border: 1px solid var(--border); border-radius: 6px;
+    }
+    .code-panel pre {
+      background: #282c34; color: #abb2bf; border: none; border-radius: 0 0 8px 8px; margin-top: 0; padding: 24px; overflow-x: auto;
+    }
+    .code-panel code {
+      font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;
+    }
+    .k  { color: #c678dd; font-weight: bold; }
+    .fn { color: #61afef; font-weight: bold; }
+    .s  { color: #98c379; }
+    .n  { color: #d19a66; }
+    .cm { color: #7f848e; font-style: italic; }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .proj-hero-inner { grid-template-columns: 1fr; }
+      .proj-hero-stats { display: none; }
+      .two-up { grid-template-columns: 1fr; gap: 28px; }
+      .three-up { grid-template-columns: 1fr; }
+      .five-up { grid-template-columns: repeat(3, 1fr); }
+      .assumption-grid { grid-template-columns: 1fr 1fr; }
+      .design-grid { grid-template-columns: 1fr; }
+      .code-layout { grid-template-columns: 1fr; }
+      .code-file-list { flex-direction: row; flex-wrap: wrap; position: static; }
+    }
+    @media (max-width: 560px) {
+      .five-up { grid-template-columns: repeat(2, 1fr); }
+      .assumption-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand brand-full" href="index.html">Kian Jadbabaei</a>
+    <nav class="nav" aria-label="Primary">
+      <a class="resume-link" href="index.html#projects"><span class="arrow">←</span> Back to Projects</a>
+    <a class="github-link" href="https://github.com/kianjad/Soda-Taste-Test-Analysis" target="_blank" rel="noopener" aria-label="View on GitHub"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>View Repo</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── HERO ── -->
+  <div class="proj-hero">
+    <div class="container proj-hero-inner">
+      <div>
+        <div class="proj-eyebrow">
+          <span class="proj-tag-dark">Experimental Design</span>
+          <span class="proj-date-dark">Feb – Mar 2025</span>
+        </div>
+        <h1>Soda Taste Test:<br>Factorial Design with Blocking</h1>
+        <p class="proj-hero-desc">Designed and ran a blocked 3×2 factorial experiment to test whether pouring and drinking methods affect soda taste perception. When Shapiro-Wilk rejected normality, pivoted to permutation tests, running 10,000 shuffles per block to build a valid empirical null distribution and recover clean inference.</p>
+        <div class="proj-hero-skills">
+          <span>R</span>
+          <span>Factorial Design</span>
+          <span>ANOVA</span>
+          <span>Permutation Tests</span>
+          <span>Power Analysis</span>
+        </div>
+      </div>
+      <div class="proj-hero-stats">
+        <div>
+          <span class="proj-hero-stat-num">9</span>
+          <span class="proj-hero-stat-label">Participants (blocks)</span>
+        </div>
+        <div>
+          <span class="proj-hero-stat-num">54</span>
+          <span class="proj-hero-stat-label">Total observations</span>
+        </div>
+        <div>
+          <span class="proj-hero-stat-num">10K</span>
+          <span class="proj-hero-stat-label">Permutations</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB NAV ── -->
+  <div class="proj-tabs">
+    <div class="container proj-tabs-inner">
+      <button class="proj-tab active" data-tab="overview">Overview</button>
+      <button class="proj-tab" data-tab="results">Results</button>
+      <button class="proj-tab" data-tab="methods">Statistical Methods</button>
+      <button class="proj-tab" data-tab="code">Code</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       OVERVIEW
+  ════════════════════════════════════ -->
+  <div class="proj-tab-panel active" id="tab-overview">
+    <div class="container">
+
+      <div class="two-up">
+        <div class="prose">
+          <h3>The Question</h3>
+          <p>Taste is about more than flavor. Research suggests carbonation affects sweetness perception, and serving method directly affects carbonation. This experiment tests whether pouring soda differently or drinking through a straw changes how much people enjoy it.</p>
+          <p>The design is a <strong>blocked 3×2 factorial</strong>: 3 pouring methods crossed with 2 drinking methods. Each of the 9 participants tasted all 6 combinations in a randomized order, serving as their own control to remove individual taste bias.</p>
+
+          <h3>Why Permutation Tests?</h3>
+          <p>The original plan was standard ANOVA. But Shapiro-Wilk returned <strong>W = 0.954, p = 0.038</strong>, rejecting normality of residuals at α = 0.05. The analysis instead used <strong>permutation tests</strong>, shuffling taste ratings within each participant block 10,000 times to build an empirical null distribution with no distributional assumptions.</p>
+
+          <h3>Key Findings</h3>
+          <p>Both pouring method (p = 0.0004) and consumption method (p &lt; 0.0001) significantly affected taste ratings. The interaction was not significant (p = 0.664), meaning the two factors act independently. Drinking directly added about 1.6 points regardless of how the soda was poured.</p>
+        </div>
+
+        <div>
+          <span class="section-label">Experiment Structure</span>
+          <div class="design-grid">
+            <div class="design-factor">
+              <div class="design-factor-title">Factor A: Pouring Method (3 levels)</div>
+              <div class="design-factor-levels">
+                <div class="design-level">Down the side of glass</div>
+                <div class="design-level">Straight into center</div>
+                <div class="design-level">Left in the can</div>
+              </div>
+            </div>
+            <div class="design-factor">
+              <div class="design-factor-title">Factor B: Consumption (2 levels)</div>
+              <div class="design-factor-levels">
+                <div class="design-level">Direct from container</div>
+                <div class="design-level">Through a straw</div>
+              </div>
+            </div>
+          </div>
+          <div class="design-factor" style="margin-bottom:10px;">
+            <div class="design-factor-title">Blocking Variable</div>
+            <div class="design-factor-levels">
+              <div class="design-level">Participant: 9 blocks × 6 conditions = 54 obs</div>
+            </div>
+          </div>
+          <div class="design-factor">
+            <div class="design-factor-title">Response Variable</div>
+            <div class="design-factor-levels">
+              <div class="design-level">Taste rating: 0 (worst) to 10 (best)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       RESULTS
+  ════════════════════════════════════ -->
+  <div class="proj-tab-panel" id="tab-results">
+    <div class="container">
+  
+      <div class="two-up">
+        <div>
+          <span class="section-label">Mean Taste Ratings by Condition</span>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Pouring Method</th>
+                  <th>Consumption</th>
+                  <th>Mean Rating</th>
+                  <th>vs. Grand Mean</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="hi">Straight into center</td>
+                  <td>Direct</td>
+                  <td class="hi"><div class="bar-cell"><div class="bar" style="width:80px"></div>8.00</div></td>
+                  <td class="t-sig">+1.31 ↑</td>
+                </tr>
+                <tr>
+                  <td class="hi">Down the side</td>
+                  <td>Direct</td>
+                  <td class="hi"><div class="bar-cell"><div class="bar" style="width:77px"></div>7.78</div></td>
+                  <td class="t-sig">+1.09 ↑</td>
+                </tr>
+                <tr>
+                  <td>Left in the can</td>
+                  <td>Direct</td>
+                  <td><div class="bar-cell"><div class="bar" style="width:66px"></div>6.67</div></td>
+                  <td class="t-mute">−0.02</td>
+                </tr>
+                <tr>
+                  <td>Down the side</td>
+                  <td>Straw</td>
+                  <td><div class="bar-cell"><div class="bar" style="width:65px"></div>6.56</div></td>
+                  <td class="t-mute">−0.13</td>
+                </tr>
+                <tr>
+                  <td>Straight into center</td>
+                  <td>Straw</td>
+                  <td><div class="bar-cell"><div class="bar" style="width:61px"></div>6.11</div></td>
+                  <td class="t-mute">−0.58</td>
+                </tr>
+                <tr>
+                  <td class="lo">Left in the can</td>
+                  <td class="lo">Straw</td>
+                  <td class="lo"><div class="bar-cell"><div class="bar dim" style="width:50px"></div>5.00</div></td>
+                  <td style="color:var(--accent);font-weight:700;">−1.69 ↓</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:0.78rem;color:var(--ink-3);margin-top:8px;">Ratings on a 0–10 scale. Grand mean = 6.69 across all 54 observations.</p>
+        </div>
+
+        <div>
+          <span class="section-label">Interaction Plot</span>
+          <div class="viz-card">
+            <img src="soda_interaction_plot.png" alt="Interaction plot showing parallel lines">
+            <div class="viz-card-caption">
+              <strong>Parallel Lines = No Interaction</strong>
+              <p>The lines for "Direct" and "Straw" are nearly parallel, visually confirming the permutation result (p = 0.664). The benefit of drinking directly is additive regardless of pouring method.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-up">
+        <div>
+          <span class="section-label">Permutation Test Results</span>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Effect</th>
+                  <th>Permutation p-value</th>
+                  <th>Significant?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="hi">Consumption Method</td>
+                  <td class="t-sig">&lt; 0.0001</td>
+                  <td><span class="badge yes">Yes (α = 0.05)</span></td>
+                </tr>
+                <tr>
+                  <td class="hi">Pouring Method</td>
+                  <td class="t-sig">0.0004</td>
+                  <td><span class="badge yes">Yes (α = 0.05)</span></td>
+                </tr>
+                <tr>
+                  <td>Pouring × Consumption</td>
+                  <td class="t-mute">0.664</td>
+                  <td><span class="badge no">No, additive</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:0.78rem;color:var(--ink-3);margin-top:8px;">Based on 10,000 within-block shuffles per test. Permutation p-values are used because Shapiro-Wilk rejected normality (p = 0.038).</p>
+        </div>
+
+        <div>
+          <span class="section-label">Power Analysis Curve</span>
+          <div class="viz-card">
+            <img src="soda_power_curve.png" alt="Power simulation curve">
+            <div class="viz-card-caption">
+              <strong>Sample Size Validation</strong>
+              <p>Monte Carlo simulation shows we achieve >80% power (red line) as long as the standard error of the effect size stays below 1.0. With our n=9 blocks, we are well-powered for moderate effects.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+  </div>
+  
+  <!-- ════════════════════════════════════
+       STATISTICAL METHODS
+  ════════════════════════════════════ -->
+  <div class="proj-tab-panel" id="tab-methods">
+    <div class="container">
+
+      <div class="two-up">
+        <div class="prose">
+          <h3>Why a Blocked Factorial Design?</h3>
+          <p>A <strong>factorial design</strong> lets you test multiple factors simultaneously and detect interactions, such as whether the effect of pouring method changes depending on how you drink it. Testing them separately in two experiments would miss this.</p>
+          <p>Adding a <strong>blocking structure</strong> (each participant tries all 6 conditions) removes individual-level taste variation entirely. Since some people consistently rate things higher or lower, having them serve as their own controls isolates the treatment effects far more precisely than a between-subjects design with 9 different people per condition would.</p>
+          <p>Order effects were mitigated by randomizing the sequence of conditions for each participant, with water provided between each sample to reset the palate.</p>
+
+          <h3>The Permutation Test Logic</h3>
+          <p>The core idea: if pouring and consumption method truly have no effect, then within any participant, any assignment of taste ratings to conditions is equally likely. So we can simulate the null distribution by randomly shuffling ratings within each block.</p>
+          <ol>
+            <li>For each participant, randomly permute their 6 taste ratings among the 6 conditions</li>
+            <li>Fit ANOVA on the permuted dataset and record the F-statistic</li>
+            <li>Repeat 10,000 times to build the empirical null distribution</li>
+            <li>p-value = proportion of permuted F-statistics ≥ observed F</li>
+          </ol>
+          <p>This was done for the overall model, then repeated separately for each factor and the interaction term, yielding p-values that are valid regardless of the violated normality assumption.</p>
+        </div>
+
+        <div>
+          <span class="section-label">ANOVA Assumption Checks</span>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Assumption</th>
+                  <th>Test / Evidence</th>
+                  <th>Result</th>
+                  <th>Verdict</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="hi">Normality</td>
+                  <td>Shapiro-Wilk: W = 0.954, p = 0.038. Left-skewed residuals, tail deviations in Q-Q plot.</td>
+                  <td>p &lt; 0.05</td>
+                  <td><span class="badge" style="background:rgba(196,75,43,0.1);color:var(--accent);">VIOLATED</span></td>
+                </tr>
+                <tr>
+                  <td>Equal Variance</td>
+                  <td>Residuals vs. fitted values showed unequal spread across groups.</td>
+                  <td>Inconclusive</td>
+                  <td><span class="badge" style="background:rgba(196,156,60,0.1);color:#a07800;">CONCERN</span></td>
+                </tr>
+                <tr>
+                  <td>Independence</td>
+                  <td>Slight pattern in residuals vs. collection order, suggesting possible palate fatigue.</td>
+                  <td>Mild pattern</td>
+                  <td><span class="badge" style="background:rgba(196,156,60,0.1);color:#a07800;">MILD CONCERN</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="prose">
+            <h3>Interpreting the Non-Significant Interaction</h3>
+            <p>A null interaction result (p = 0.664) is a real finding, not a failure. It says the two factors are <strong>additive</strong>: the benefit of drinking directly is the same roughly 1.5 point boost whether the soda was poured straight, down the side, or left in the can. You don't need to optimize which combination you use; each improvement works independently.</p>
+            <p>This simplifies the practical takeaway considerably compared to a significant interaction, which would have required condition-specific recommendations.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       CODE
+  ════════════════════════════════════ -->
+  <div class="proj-tab-panel" id="tab-code">
+    <div class="container">
+      <div class="code-layout">
+
+        <div class="code-file-list">
+          <button class="code-file-btn active" data-file="perm">permutation_test.R</button>
+          <button class="code-file-btn" data-file="model">model_checking.R</button>
+          <button class="code-file-btn" data-file="power">power_factorial_32.R</button>
+        </div>
+
+        <div>
+
+          <!-- permutation_test.R -->
+          <div class="code-panel active" id="code-perm">
+            <div class="code-desc">Shuffles taste ratings within each participant block 10,000 times. Within-block permutation preserves participant effects while destroying treatment signal under H₀.</div>
+            <pre style="background: #282c34; color: #abb2bf; border: none; border-radius: 8px; margin: 0; padding: 24px; overflow-x: auto;"><code style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;"><span class="cm"># ── Overall model permutation test ──────────────────────────</span>
+perm_f &lt;- <span class="fn">numeric</span>(<span class="n">10000</span>)
+reps   &lt;- <span class="n">10000</span>
+blocks &lt;- <span class="fn">unique</span>(soda_data$Participant)
+
+<span class="k">for</span>(i <span class="k">in</span> <span class="n">1</span>:reps){
+  soda_perm &lt;- soda_data
+
+  <span class="cm"># shuffle ratings within each participant block</span>
+  <span class="k">for</span>(curr_block <span class="k">in</span> blocks){
+    ind &lt;- <span class="fn">which</span>(soda_data$Participant == curr_block)
+    soda_perm$Taste_Rating[ind] &lt;- <span class="fn">sample</span>(soda_perm$Taste_Rating[ind])
+  }
+
+  perm_f[i] &lt;- <span class="fn">summary</span>(<span class="fn">aov</span>(
+    Taste_Rating ~ Pouring_Method * Consumption_Method,
+    data = soda_perm
+  ))[[<span class="n">1</span>]][<span class="n">1</span>, <span class="n">4</span>]
+}
+
+f_actual &lt;- <span class="fn">summary</span>(<span class="fn">aov</span>(
+  Taste_Rating ~ Pouring_Method * Consumption_Method,
+  data = soda_data
+))[[<span class="n">1</span>]][<span class="n">1</span>, <span class="n">4</span>]
+
+perm_p &lt;- <span class="fn">sum</span>(perm_f &gt;= f_actual) / reps  <span class="cm"># p = 0.0002</span>
+
+
+<span class="cm"># ── Per-factor permutation tests ────────────────────────────</span>
+perm_f_pouring     &lt;- <span class="fn">numeric</span>(reps)
+perm_f_consumption &lt;- <span class="fn">numeric</span>(reps)
+perm_f_interaction &lt;- <span class="fn">numeric</span>(reps)
+
+<span class="k">for</span>(i <span class="k">in</span> <span class="n">1</span>:reps){
+  soda_perm &lt;- soda_data
+  <span class="k">for</span>(curr_block <span class="k">in</span> blocks){
+    ind &lt;- <span class="fn">which</span>(soda_data$Participant == curr_block)
+    soda_perm$Taste_Rating[ind] &lt;- <span class="fn">sample</span>(soda_perm$Taste_Rating[ind])
+  }
+  aov_s &lt;- <span class="fn">summary</span>(<span class="fn">aov</span>(
+    Taste_Rating ~ Pouring_Method * Consumption_Method,
+    data = soda_perm
+  ))[[<span class="n">1</span>]]
+  perm_f_pouring[i]     &lt;- aov_s[<span class="n">1</span>, <span class="n">4</span>]  <span class="cm"># Pouring Method F</span>
+  perm_f_consumption[i] &lt;- aov_s[<span class="n">2</span>, <span class="n">4</span>]  <span class="cm"># Consumption F</span>
+  perm_f_interaction[i] &lt;- aov_s[<span class="n">3</span>, <span class="n">4</span>]  <span class="cm"># Interaction F</span>
+}
+
+<span class="cm"># Observed F-statistics from real data</span>
+aov_obs &lt;- <span class="fn">summary</span>(<span class="fn">aov</span>(
+  Taste_Rating ~ Pouring_Method * Consumption_Method,
+  data = soda_data
+))[[<span class="n">1</span>]]
+
+p_pouring     &lt;- <span class="fn">mean</span>(perm_f_pouring     &gt;= aov_obs[<span class="n">1</span>, <span class="n">4</span>])  <span class="cm"># 0.0002</span>
+p_consumption &lt;- <span class="fn">mean</span>(perm_f_consumption &gt;= aov_obs[<span class="n">2</span>, <span class="n">4</span>])  <span class="cm"># &lt;0.0001</span>
+p_interaction &lt;- <span class="fn">mean</span>(perm_f_interaction &gt;= aov_obs[<span class="n">3</span>, <span class="n">4</span>])  <span class="cm"># 0.655</span>
+</code></pre>
+          </div>
+
+          <!-- model_checking.R -->
+          <div class="code-panel" id="code-model">
+            <div class="code-desc">Runs normality, variance, and independence diagnostics on residuals. Shapiro-Wilk rejection (p = 0.038) was the key decision point that justified switching to permutation tests.</div>
+            <pre style="background: #282c34; color: #abb2bf; border: none; border-radius: 8px; margin: 0; padding: 24px; overflow-x: auto;"><code style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;"><span class="cm"># ── Fit linear model ─────────────────────────────────────────</span>
+model_norm &lt;- <span class="fn">lm</span>(
+  Taste_Rating ~ Pouring_Method + Consumption_Method +
+    Pouring_Method * Consumption_Method,
+  data = soda_data
+)
+
+<span class="cm"># Residual histogram: look for skew or multi-modality</span>
+<span class="fn">hist</span>(model_norm$residuals,
+     xlab = <span class="s">"residuals"</span>,
+     main = <span class="s">"Soda Data Residuals"</span>)
+<span class="cm"># → left-skewed; not the bell curve ANOVA assumes</span>
+
+<span class="cm"># Q-Q plot: deviations at tails signal non-normality</span>
+<span class="fn">qqnorm</span>(model_norm$residuals)
+<span class="fn">qqline</span>(model_norm$residuals)
+<span class="cm"># → clear lower-tail deviation visible</span>
+
+<span class="cm"># Shapiro-Wilk formal test</span>
+shapiro_result &lt;- <span class="fn">shapiro.test</span>(model_norm$residuals)
+<span class="cm"># → W = 0.954, p = 0.038</span>
+<span class="cm"># → reject normality at α = 0.05 → ANOVA invalid</span>
+
+<span class="fn">kable</span>(<span class="fn">data.frame</span>(
+  Statistic = <span class="fn">round</span>(shapiro_result$statistic, <span class="n">3</span>),
+  P_Value   = <span class="fn">round</span>(shapiro_result$p.value, <span class="n">3</span>)
+), col.names = <span class="fn">c</span>(<span class="s">"Shapiro-Wilk W"</span>, <span class="s">"P-Value"</span>))
+
+<span class="cm"># Residuals vs collection order: check independence</span>
+x &lt;- <span class="n">1</span>:<span class="fn">length</span>(model_norm$residuals)
+<span class="fn">plot</span>(model_norm$residuals ~ x,
+     ylab = <span class="s">"residuals"</span>,
+     main = <span class="s">"Residuals vs Order of Data Collection"</span>)
+<span class="cm"># → slight downward pattern around obs 20–30</span>
+<span class="cm"># → possible palate fatigue effect</span>
+</code></pre>
+          </div>
+
+          <!-- power_factorial_32.R -->
+          <div class="code-panel" id="code-power">
+            <div class="code-desc">Monte Carlo power function for a 3×2 factorial design. Draws random coefficients around fitted effect sizes and estimates the proportion of runs that reject H₀.</div>
+            <pre style="background: #282c34; color: #abb2bf; border: none; border-radius: 8px; margin: 0; padding: 24px; overflow-x: auto;"><code style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;"><span class="fn">power_factorial_32</span> &lt;- <span class="k">function</span>(beta_mean, beta_se, replicates,
+                                iter = <span class="n">1000</span>, alpha = <span class="n">0.05</span>){
+  <span class="cm"># beta_mean: 6 coefficient estimates from fitted model</span>
+  <span class="cm"># beta_se:   uncertainty in those estimates</span>
+  <span class="cm"># replicates: sample size to test</span>
+
+  <span class="k">if</span>(<span class="fn">length</span>(beta_mean) != <span class="n">6</span>) <span class="fn">stop</span>(<span class="s">"beta_mean must have 6 values"</span>)
+  <span class="k">if</span>(<span class="fn">length</span>(beta_se)   != <span class="n">6</span>) <span class="fn">stop</span>(<span class="s">"beta_se must have 6 values"</span>)
+
+  <span class="cm"># Generate design matrix for 3×2 factorial</span>
+  sim_data &lt;- <span class="fn">data.frame</span>(
+    outcome = <span class="fn">rep</span>(<span class="k">NA</span>, (<span class="n">6</span> * replicates)),
+    x1 = <span class="fn">rep</span>(<span class="fn">c</span>(<span class="n">0</span>,<span class="n">0</span>,<span class="n">0</span>,<span class="n">1</span>,<span class="n">1</span>,<span class="n">1</span>), replicates),
+    x2 = <span class="fn">rep</span>(<span class="fn">c</span>(<span class="n">0</span>,<span class="n">0</span>,<span class="n">1</span>,<span class="n">0</span>,<span class="n">0</span>,<span class="n">1</span>), replicates),
+    x3 = <span class="fn">rep</span>(<span class="fn">c</span>(<span class="n">0</span>,<span class="n">1</span>,<span class="n">0</span>,<span class="n">0</span>,<span class="n">1</span>,<span class="n">0</span>), replicates)
+  )
+
+  pvals &lt;- <span class="k">NA</span>
+
+  <span class="k">for</span>(j <span class="k">in</span> <span class="n">1</span>:iter){
+    <span class="k">for</span>(i <span class="k">in</span> <span class="n">1</span>:<span class="fn">nrow</span>(sim_data)){
+      <span class="cm"># Draw random betas around fitted estimates</span>
+      beta &lt;- <span class="fn">rnorm</span>(n = <span class="n">8</span>, mean = beta_mean, sd = beta_se)
+
+      sim_data$outcome[i] &lt;- beta[<span class="n">1</span>] +
+        beta[<span class="n">2</span>] * sim_data$x1[i] +
+        beta[<span class="n">3</span>] * sim_data$x2[i] +
+        beta[<span class="n">4</span>] * sim_data$x3[i] +
+        beta[<span class="n">5</span>] * sim_data$x1[i] * sim_data$x2[i] +
+        beta[<span class="n">6</span>] * sim_data$x1[i] * sim_data$x3[i]
+    }
+
+    model1 &lt;- <span class="fn">lm</span>(outcome ~ x1 + x2 + x3 + x1*x2 + x1*x3,
+                 data = sim_data)
+    f         &lt;- <span class="fn">summary</span>(model1)$fstatistic
+    pvals[j]  &lt;- <span class="fn">pf</span>(f[<span class="n">1</span>], f[<span class="n">2</span>], f[<span class="n">3</span>], lower.tail = <span class="k">FALSE</span>)
+  }
+
+  <span class="cm"># Power = proportion of runs rejecting H₀</span>
+  power &lt;- <span class="fn">sum</span>(pvals &lt; alpha) / iter
+  <span class="k">return</span>(power)
+  <span class="cm"># → >80% power at n=9 for Beta_SE ≤ 1.0</span>
+}
+</code></pre>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© 2026 Kian Jadbabaei</p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.proj-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.proj-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.proj-tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.code-file-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.code-file-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('code-' + btn.dataset.file).classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

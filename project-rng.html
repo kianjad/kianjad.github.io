@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gamma & Beta RNG — Kian Jadbabaei</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Article Layout Overrides */
+    .article-width { max-width: 800px; margin: 0 auto; }
+    
+    /* Code Snippets */
+    .code-snippet {
+      background: #282c34;
+      padding: 24px;
+      border-radius: 8px;
+      color: #abb2bf;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-top: 20px;
+      margin-bottom: 40px;
+      border: 1px solid #181a1f;
+      white-space: pre;
+    }
+
+    /* Math Rendering */
+    .math-block {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    .math-display {
+      font-family: 'Georgia', serif;
+      font-size: 1.25rem;
+      color: var(--ink);
+      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      font-size: 0.9em;
+      margin: 0 4px;
+    }
+    .fraction .num { border-bottom: 1px solid var(--ink); padding-bottom: 2px; display: block; }
+    .fraction .den { padding-top: 2px; display: block; }
+
+    /* Stats Grid (Key Takeaways) */
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px; }
+    .stat-box { background: var(--white); padding: 24px 16px; border: 1px solid var(--border); border-radius: 6px; text-align: center; }
+    .stat-val { font-family: var(--serif); font-size: 2.2rem; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+    .stat-key { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 700; }
+    .stat-desc { font-size: 0.85rem; color: var(--ink-2); line-height: 1.4; margin-top: 8px; }
+
+    /* Algorithm Cards */
+    .algo-section { margin-bottom: 60px; }
+    .algo-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .algo-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: rgba(196, 75, 43, 0.1);
+      padding: 4px 8px;
+      border-radius: 3px;
+      /* Removed text-transform: uppercase to preserve the alpha symbol */
+    }
+    .algo-title {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      color: var(--ink);
+    }
+
+    /* Histogram Grid */
+    .hist-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .hist-item img {
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+    .hist-caption {
+      font-size: 0.8rem;
+      color: var(--ink-3);
+      text-align: center;
+      margin-top: 10px;
+      font-family: monospace;
+    }
+
+    /* Validation Table */
+    .ks-table-wrap {
+      margin-top: 30px;
+      margin-bottom: 40px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .ks-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .ks-table th {
+      background: var(--cream-2);
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 700;
+      color: var(--ink-3);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .ks-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink);
+    }
+    .ks-table tr:last-child td { border-bottom: none; }
+    .ks-pass {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 700px) {
+      .stat-grid { grid-template-columns: 1fr; }
+      .hist-grid { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; gap: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand brand-full" href="index.html">Kian Jadbabaei</a> 
+      <nav class="nav" aria-label="Primary">
+        <a class="resume-link" href="index.html#projects"><span class="arrow">←</span> Back to Projects</a>
+      <a class="github-link" href="https://github.com/kianjad/Gamma-and-Beta-Random-Number-Generators" target="_blank" rel="noopener" aria-label="View on GitHub"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>View Repo</a>
+    </nav>
+    </div>
+  </header>
+
+  <main>
+    
+    <section class="section" style="padding-bottom: 40px;">
+        <div class="container">
+          <div class="article-width">
+            <span class="project-tag" style="display:block; margin-bottom:12px;">Monte Carlo Methods · R Language</span>
+            <h1 style="font-family:var(--serif); font-size:3rem; line-height:1.1; margin-bottom:24px;">Gamma & Beta RNG Algorithms</h1>
+            <p class="lead" style="font-size:1.2rem; color:var(--ink-2); opacity:1;">
+              A reproduction of the industrial-grade algorithms behind R's random number generation. We implemented the Dieter & Ahrens (1974) framework, using dynamic routing and algebraic optimization to solve the performance degradation found in standard inverse-CDF methods.
+            </p>
+            
+            <div class="stat-grid">
+                <div class="stat-box">
+                  <div class="stat-val" style="font-size: 1.3rem; margin-bottom: 8px;">The Master Router</div>
+                  <div class="stat-key" style="margin-bottom: 12px;">Architecture</div>
+                  <div class="stat-desc">A dynamic dispatcher that routes parameters to specialized algorithms, mirroring the internal logic of foundational libraries like R.</div>
+                </div>
+              
+                <div class="stat-box">
+                  <div class="stat-val" style="font-size: 1.3rem; margin-bottom: 8px;">Squeeze Bounds</div>
+                  <div class="stat-key" style="margin-bottom: 12px;">Optimization</div>
+                  <div class="stat-desc">Polynomial "squeeze" checks bypass expensive logarithmic and exponential calculations in over 99% of simulation loops.</div>
+                </div>
+              
+                <div class="stat-box">
+                  <div class="stat-val" style="font-size: 1.3rem; margin-bottom: 8px;">The 2.53 Boundary</div>
+                  <div class="stat-key" style="margin-bottom: 12px;">Math Rigor</div>
+                  <div class="stat-desc">A mathematical limit derived from a cubic discriminant; below this threshold, optimized polynomial bounds are mathematically invalid.</div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-num">01</span>
+          <h2>The Algorithms</h2>
+        </div>
+        
+        <div class="article-width">
+          
+          <p style="margin-bottom:40px; color:var(--ink-2); font-size: 1.05rem;">
+            No single acceptance-rejection envelope fits the Gamma distribution perfectly because its shape changes drastically as the shape parameter <strong>&alpha;</strong> grows. We implemented three distinct algorithms to cover the entire domain efficiently.
+          </p>
+
+          <div class="algo-section">
+            <div class="algo-header">
+              <h3 class="algo-title">Algorithm GS</h3>
+              <span class="algo-tag">SMALL PARAMETERS (&alpha; &le; 1)</span>
+            </div>
+            <p style="color:var(--ink-2); margin-bottom:16px;">
+              When <strong>&alpha; &le; 1</strong>, the Gamma density approaches infinity at <em>x = 0</em>. Standard envelopes fail here because they cannot capture this vertical asymptote.
+            </p>
+            <p style="color:var(--ink-2);">
+              <strong>How it works:</strong> We implemented a <strong>Piecewise Envelope</strong>. We use a power function <em>x<sup>&alpha;-1</sup></em> for the region close to zero (to match the asymptote) and an exponential decay <em>e<sup>-x</sup></em> for the tail (x > 1).
+            </p>
+            
+            <div class="code-snippet"><pre style="margin:0;padding:0;background:transparent;border:none;"><code style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;"><span style="color:#7f848e"># Algorithm GS: Piecewise Envelope Logic</span>
+<span style="color:#c678dd">if</span> (p &lt;= <span style="color:#d19a66">1</span>) {
+  <span style="color:#7f848e"># Case 1: Power function for x &lt;= 1 (Handles Asymptote)</span>
+  x &lt;- p^(<span style="color:#d19a66">1</span> / a)
+  <span style="color:#c678dd">if</span> (<span style="color:#61afef">log</span>(u_prime) &lt;= -x) { accepted &lt;- <span style="color:#d19a66">TRUE</span> }
+} <span style="color:#c678dd">else</span> {
+  <span style="color:#7f848e"># Case 2: Exponential decay for x > 1</span>
+  x &lt;- -<span style="color:#61afef">log</span>((b - p) / a)
+  <span style="color:#c678dd">if</span> (<span style="color:#61afef">log</span>(u_prime) &lt;= (a - <span style="color:#d19a66">1</span>) * <span style="color:#61afef">log</span>(x)) { accepted &lt;- <span style="color:#d19a66">TRUE</span> }
+}</code></pre></div>
+          </div>
+
+          <div class="algo-section">
+            <div class="algo-header">
+              <h3 class="algo-title">Algorithm GC</h3>
+              <span class="algo-tag">MEDIUM PARAMETERS (1 &lt; &alpha; &le; 2.53)</span>
+            </div>
+            <p style="color:var(--ink-2); margin-bottom:16px;">
+              For parameters slightly above 1, the distribution has a mode but is still heavily skewed. A normal envelope is too thin (its tails decay too fast), leading to high rejection rates.
+            </p>
+            <p style="color:var(--ink-2);">
+              <strong>How it works:</strong> We use a <strong>Cauchy Distribution</strong> as the envelope. Since Cauchy tails decay at <em>O(x<sup>-2</sup>)</em> rather than exponentially, they remain "thick" enough to enclose the skewed Gamma density efficiently.
+            </p>
+
+            <div class="code-snippet"><pre style="margin:0;padding:0;background:transparent;border:none;"><code style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;"><span style="color:#7f848e"># Algorithm GC: Cauchy Envelope Logic</span>
+<span style="color:#7f848e"># Step 2: Generate Cauchy candidate using inverse CDF</span>
+t &lt;- s * <span style="color:#61afef">tan</span>(pi * (u - <span style="color:#d19a66">0.5</span>))
+x &lt;- b + t
+
+<span style="color:#c678dd">if</span> (x >= <span style="color:#d19a66">0</span>) {
+  <span style="color:#7f848e"># Step 4: Acceptance test (evaluated on log scale)</span>
+  test_val &lt;- b * <span style="color:#61afef">log</span>(x / b) - t + <span style="color:#61afef">log</span>(<span style="color:#d19a66">1</span> + (t^<span style="color:#d19a66">2</span> / A))
+  <span style="color:#c678dd">if</span> (<span style="color:#61afef">log</span>(u2) &lt;= test_val) { accepted &lt;- <span style="color:#d19a66">TRUE</span> }
+}</code></pre></div>
+          </div>
+
+          <div class="algo-section">
+            <div class="algo-header">
+              <h3 class="algo-title">Algorithm GO</h3>
+              <span class="algo-tag">LARGE PARAMETERS (&alpha; &gt; 2.53)</span>
+            </div>
+            <p style="color:var(--ink-2); margin-bottom:24px;">
+              For large <strong>&alpha;</strong>, the Gamma distribution converges towards a Normal distribution. However, evaluating the acceptance ratio requires computing logarithms and exponentials, which are computationally expensive.
+            </p>
+            
+            <div class="two-col" style="align-items: center; margin-bottom: 30px;">
+              <div>
+                <h4 style="font-family:var(--serif); margin-bottom:10px;">The "Squeeze" Optimization</h4>
+                <p style="color:var(--ink-2); font-size: 0.95rem;">
+                  Instead of calculating the full density ratio <em>f(x)/g(x)</em> every time, we check a simple polynomial <strong>Squeeze Bound (Lemma 3)</strong> first. 
+                </p>
+                <p style="color:var(--ink-2); font-size: 0.95rem; margin-top:10px;">
+                  If the random variable <em>u</em> falls below this polynomial curve <em>L</em>, we accept immediately. This bypasses the expensive math in over 99% of cases.
+                </p>
+              </div>
+              <div>
+                <div class="math-block" style="margin:0;">
+                  <p class="math-label">Lemma 3: Cubic Squeeze Bound</p>
+                  <div class="math-display">
+                    L = 1 - S(W-1) + 
+                    <span class="fraction">
+                      <span class="num">s<sup>3</sup></span>
+                      <span class="den">&radic;&alpha;</span>
+                    </span>
+                    W
+                  </div>
+                  <p class="math-desc">Valid only when <strong>&alpha;</strong> > 2.53.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="code-snippet"><pre style="margin:0;padding:0;background:transparent;border:none;"><code style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;"><span style="color:#7f848e"># Algorithm GO: Quick Acceptance Logic</span>
+<span style="color:#c678dd">if</span> (s_norm >= <span style="color:#d19a66">0</span>) {
+  <span style="color:#7f848e"># Simple bound for positive deviation</span>
+  L &lt;- <span style="color:#d19a66">1</span> - S * (W - <span style="color:#d19a66">1</span>)
+} <span style="color:#c678dd">else</span> {
+  <span style="color:#7f848e"># Cubic correction for negative deviation (Lemma 3)</span>
+  L &lt;- <span style="color:#d19a66">1</span> - S * (W - <span style="color:#d19a66">1</span>) + (s_norm^<span style="color:#d19a66">3</span> / <span style="color:#61afef">sqrt</span>(a)) * W
+}
+
+<span style="color:#7f848e"># THE OPTIMIZATION: Check polynomial L before expensive logs</span>
+<span style="color:#c678dd">if</span> (u2 &lt;= L) {
+  samples[i] &lt;- x  <span style="color:#98c379"># Accepted! (O(1) cost)</span>
+  accepted &lt;- <span style="color:#d19a66">TRUE</span>
+} <span style="color:#c678dd">else</span> {
+  <span style="color:#7f848e"># Only run full log-density check if squeeze fails (&lt; 1% of cases)</span>
+}</code></pre></div>
+          </div>
+
+          <div class="algo-section" style="margin-bottom:0;">
+            <div class="algo-header">
+              <h3 class="algo-title">Beta Distribution</h3>
+              <span class="algo-tag">EXTENSION</span>
+            </div>
+            <p style="color:var(--ink-2);">
+              We also implemented a Beta generator using the <strong>Gamma-Ratio Method</strong>. Since <em>X/(X+Y) ~ Beta(&alpha;, &beta;)</em>, we simply draw two independent Gamma variables using our optimized router and compute the quotient. This extends our O(1) efficiency to the Beta family.
+            </p>
+
+            <div class="code-snippet"><pre style="margin:0;padding:0;background:transparent;border:none;"><code style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;"><span style="color:#61afef">generate_beta_from_gamma</span> &lt;- <span style="color:#c678dd">function</span>(n, a, b) {
+  <span style="color:#7f848e"># Step 1 & 2: Generate independent Gamma variables</span>
+  x &lt;- <span style="color:#61afef">generate_gamma_complete</span>(n, a)
+  y &lt;- <span style="color:#61afef">generate_gamma_complete</span>(n, b)
+  
+  <span style="color:#7f848e"># Step 3: Compute quotient</span>
+  <span style="color:#c678dd">return</span>(x / (x + y))
+}</code></pre></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="article-width">
+          <div class="section-header">
+            <span class="section-num">02</span>
+            <h2>The Master Router</h2>
+          </div>
+          <p style="margin-bottom:30px; color:var(--ink-2); font-size: 1.05rem;">
+            To make the generator universally applicable, we built a <strong>Master Routing Function</strong> that inspects the shape parameter <strong>&alpha;</strong> and automatically dispatches the request to the mathematically optimal algorithm.
+          </p>
+          
+          <div class="code-snippet"><pre style="margin:0;padding:0;background:transparent;border:none;"><code style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.6;"><span style="color:#61afef">generate_gamma_complete</span> &lt;- <span style="color:#c678dd">function</span>(n, a) {
+  
+  <span style="color:#c678dd">if</span> (a &lt;= <span style="color:#d19a66">1</span>) {
+    <span style="color:#7f848e"># Algorithm GS: Handles infinite asymptote at zero</span>
+    <span style="color:#c678dd">return</span>(generate_gamma_GS(n, a))
+    
+  } <span style="color:#c678dd">else if</span> (a &lt;= <span style="color:#d19a66">2.53278</span>) {
+    <span style="color:#7f848e"># Algorithm GC: Cauchy envelope (GO squeeze invalid here)</span>
+    <span style="color:#c678dd">return</span>(generate_gamma_GC(n, a))
+    
+  } <span style="color:#c678dd">else</span> {
+    <span style="color:#7f848e"># Algorithm GO: Normal-Exp split with Squeeze optimization</span>
+    <span style="color:#c678dd">return</span>(generate_gamma_GO(n, a))
+  }
+}</code></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="article-width">
+          <div class="section-header">
+            <span class="section-num">03</span>
+            <h2>Validation Results</h2>
+          </div>
+          
+          <p style="margin-bottom:20px; color:var(--ink-2);">
+            We verified accuracy by generating <strong>10,000 samples</strong> for various parameter configurations and comparing them against R's built-in <code>dgamma</code> and <code>dbeta</code> theoretical densities.
+          </p>
+          <p style="margin-bottom:20px; color:var(--ink-2);">
+            We utilized the <strong>Kolmogorov-Smirnov (K-S) Test</strong> to statistically quantify the fit. In all cases, p-values exceeded 0.05, meaning we fail to reject the null hypothesis—confirming the generated distributions are statistically indistinguishable from the true theoretical distributions.
+          </p>
+
+          <div class="ks-table-wrap">
+            <table class="ks-table">
+              <thead>
+                <tr>
+                  <th>Algorithm</th>
+                  <th>Distribution Parameters</th>
+                  <th>K-S Test p-value</th>
+                  <th>Conclusion</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GS</td>
+                  <td>Gamma (&alpha; = 0.5)</td>
+                  <td>0.6150</td>
+                  <td><span class="ks-pass">PASS</span></td>
+                </tr>
+                <tr>
+                  <td>GC</td>
+                  <td>Gamma (&alpha; = 2.0)</td>
+                  <td>0.6292</td>
+                  <td><span class="ks-pass">PASS</span></td>
+                </tr>
+                <tr>
+                  <td>GO</td>
+                  <td>Gamma (&alpha; = 10.0)</td>
+                  <td>0.5681</td>
+                  <td><span class="ks-pass">PASS</span></td>
+                </tr>
+                <tr>
+                  <td>Beta</td>
+                  <td>Beta (&alpha;=2.5, &beta;=5.0)</td>
+                  <td>0.7920</td>
+                  <td><span class="ks-pass">PASS</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="hist-grid">
+            <div class="hist-item">
+              <img src="gs-hist.png" alt="GS Algorithm Histogram" loading="lazy">
+              <div class="hist-caption">GS (&alpha;=0.5): Matches asymptote at 0</div>
+            </div>
+            <div class="hist-item">
+              <img src="gc-hist.png" alt="GC Algorithm Histogram" loading="lazy">
+              <div class="hist-caption">GC (&alpha;=2.0): Cauchy envelope fit</div>
+            </div>
+            <div class="hist-item">
+              <img src="go-hist.png" alt="GO Algorithm Histogram" loading="lazy">
+              <div class="hist-caption">GO (&alpha;=10.0): Normal-Exp squeeze</div>
+            </div>
+            <div class="hist-item">
+              <img src="beta-hist.png" alt="Beta Algorithm Histogram" loading="lazy">
+              <div class="hist-caption">Beta (2.5, 5.0): Via Gamma Ratio</div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© 2026 Kian Jadbabaei</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

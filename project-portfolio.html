@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portfolio Website | Kian Jadbabaei</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ══════════════════════════════════════
+       PORTFOLIO PAGE — SLATE + ELECTRIC BLUE
+    ══════════════════════════════════════ */
+
+    :root {
+      --p-bg:      #f0f3f7;
+      --p-bg2:     #e4eaf2;
+      --p-border:  rgba(30,50,90,0.1);
+      --p-ink:     #1a2540;
+      --p-muted:   rgba(30,50,90,0.65);
+      --p-faint:   rgba(30,50,90,0.05);
+      --p-accent:  #2563eb;
+      --p-bright:  #38bdf8;
+      --p-gold:    #2563eb;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--p-bg);
+      color: var(--p-ink);
+      font-family: var(--sans);
+      overflow-x: hidden;
+    }
+
+    /* ── Topbar override ── */
+    .topbar {
+      background: rgba(240,243,247,0.85) !important;
+      border-bottom: 1px solid var(--p-border) !important;
+      backdrop-filter: blur(12px) !important;
+    }
+    .topbar.scrolled { box-shadow: 0 4px 16px rgba(30,50,90,0.08) !important; }
+    .brand-full { color: var(--p-ink) !important; }
+    .brand-full:hover { color: var(--p-accent) !important; }
+    .resume-link { color: var(--p-muted) !important; }
+    .resume-link:hover { color: var(--p-ink) !important; }
+    .arrow { color: var(--p-muted) !important; }
+    .github-link {
+      color: var(--p-accent) !important;
+      border-color: rgba(37,99,235,0.3) !important;
+      background: rgba(37,99,235,0.06) !important;
+    }
+    .github-link:hover {
+      color: #fff !important;
+      border-color: var(--p-accent) !important;
+      background: var(--p-accent) !important;
+    }
+
+    /* ── Hero ── */
+    .port-hero {
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 0 72px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0f1f45 0%, #1a3a6e 35%, #1e4d8c 60%, #0e3060 100%);
+    }
+    .port-hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 50% 70% at 80% 15%, rgba(56,189,248,0.22), transparent),
+        radial-gradient(ellipse 35% 50% at 10% 85%, rgba(37,99,235,0.3), transparent),
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(15,31,69,0.6), transparent);
+    }
+    .port-ghost-num {
+      position: absolute;
+      top: -0.05em;
+      right: -0.02em;
+      font-family: var(--serif);
+      font-size: clamp(260px, 28vw, 400px);
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.06);
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: -0.04em;
+    }
+    .port-hero-inner {
+      position: relative;
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+    .port-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .port-tag {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--p-bright);
+      border: 1px solid rgba(56,189,248,0.4);
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+    .port-eyebrow-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, rgba(56,189,248,0.4), transparent);
+    }
+    .port-eyebrow-date {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+    }
+    .port-title {
+      font-family: var(--serif);
+      font-size: clamp(3rem, 7vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 28px;
+    }
+    .port-title em {
+      font-style: italic;
+      color: var(--p-bright);
+    }
+    .port-desc {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.72);
+      font-weight: 400;
+      line-height: 1.7;
+      max-width: 52ch;
+      margin-bottom: 36px;
+    }
+    .port-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .port-skills span {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+
+    /* Right aside stats */
+    .port-hero-aside { padding-bottom: 6px; }
+    .port-stat-row {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 18px 0;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .port-stat-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .port-stat-num {
+      font-family: var(--serif);
+      font-size: 2.4rem;
+      color: #fff;
+      line-height: 1;
+    }
+    .port-stat-num.accent { color: var(--p-bright); }
+    .port-stat-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: right;
+    }
+
+    /* Scroll hint */
+    .port-scroll-hint {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0.35;
+      animation: portBob 2.4s ease-in-out infinite;
+    }
+    .port-scroll-hint span {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .port-scroll-arrow { width: 1px; height: 40px; background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent); }
+    @keyframes portBob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+    /* ══ SECTIONS ══ */
+    .port-section { border-top: 1px solid var(--p-border); padding: 80px 0; }
+    .port-container { max-width: var(--container); margin: 0 auto; padding: 0 40px; }
+
+    .port-section-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--p-accent);
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .port-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--p-border);
+    }
+
+    /* Design system grid */
+    .port-ds-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      background: var(--p-border);
+      border: 1px solid var(--p-border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 2px;
+    }
+    .port-ds-cell { background: #fff; padding: 32px 36px; }
+    .port-ds-cell.full { grid-column: 1 / -1; }
+    .port-ds-cell-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--p-muted);
+      margin-bottom: 20px;
+    }
+
+    /* Palette */
+    .port-palette { display: flex; gap: 0; height: 64px; border-radius: 5px; overflow: hidden; margin-bottom: 10px; }
+    .port-swatch { flex: 1; position: relative; }
+    .port-swatch-tip {
+      position: absolute;
+      bottom: 6px;
+      left: 8px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.04em;
+      opacity: 0.7;
+    }
+
+    /* Type specimen */
+    .port-type-row {
+      border-bottom: 1px solid var(--p-border);
+      padding: 14px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+    .port-type-row:last-child { border-bottom: none; }
+    .port-type-meta {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.6rem;
+      color: var(--p-muted);
+      min-width: 140px;
+      letter-spacing: 0.06em;
+    }
+    .port-type-sample-serif { font-family: var(--serif); font-size: 2rem; color: var(--p-ink); line-height: 1; }
+    .port-type-sample-sans { font-family: var(--sans); font-size: 0.92rem; color: rgba(26,37,64,0.6); font-weight: 300; line-height: 1.6; }
+    .port-type-sample-mono { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--p-accent); }
+
+    /* Full-width features row */
+    .port-features-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+    .port-feature-title { font-family: var(--serif); font-size: 1.05rem; color: var(--p-ink); margin-bottom: 8px; }
+    .port-feature-desc { font-size: 0.82rem; color: var(--p-muted); font-weight: 300; line-height: 1.65; }
+
+    /* Process strip */
+    .port-process-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 2px;
+      background: var(--p-border);
+      border: 1px solid var(--p-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .port-process-step { background: #fff; padding: 28px 24px; position: relative; }
+    .port-process-num {
+      font-family: var(--serif);
+      font-size: 3.5rem;
+      color: rgba(37,99,235,0.15);
+      line-height: 1;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      user-select: none;
+    }
+    .port-process-step-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--p-accent);
+      margin-bottom: 10px;
+    }
+    .port-process-step h4 { font-family: var(--serif); font-size: 1.05rem; color: var(--p-ink); margin-bottom: 10px; line-height: 1.2; }
+    .port-process-step p { font-size: 0.85rem; color: var(--p-ink); font-weight: 400; line-height: 1.65; }
+
+    /* File tree + two-col */
+    .port-two-up {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      background: var(--p-border);
+      border: 1px solid var(--p-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .port-two-cell { background: #fff; padding: 36px; }
+    .port-two-cell h4 { font-family: var(--serif); font-size: 1.1rem; color: var(--p-ink); margin-bottom: 14px; }
+    .port-two-cell p { font-size: 0.88rem; color: var(--p-ink); font-weight: 400; line-height: 1.7; margin-bottom: 12px; }
+    .port-two-cell p:last-child { margin-bottom: 0; }
+
+    .port-file-tree {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.82rem;
+      line-height: 2;
+      color: var(--p-ink);
+    }
+    .port-file-tree .dir  { color: #1a3a6e; font-weight: 700; }
+    .port-file-tree .html { color: #2563eb; }
+    .port-file-tree .css  { color: #7c3aed; }
+    .port-file-tree .js   { color: #0891b2; }
+    .port-file-tree .img  { color: rgba(30,50,90,0.45); }
+    .port-file-tree .indent  { padding-left: 22px; display: block; }
+
+    /* Live site */
+    .port-live {
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      text-align: center;
+      background: linear-gradient(135deg, #0f1f45, #1e4d8c);
+      border: 1px solid rgba(37,99,235,0.2);
+      border-radius: 8px;
+      padding: 60px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .port-live::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(56,189,248,0.12), transparent);
+    }
+    .port-live-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      position: relative;
+    }
+    .port-live-url {
+      font-family: var(--serif);
+      font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+      color: #fff;
+      text-decoration: none;
+      border-bottom: 1px solid var(--p-bright);
+      padding-bottom: 2px;
+      transition: color 0.15s;
+      position: relative;
+    }
+    .port-live-url:hover { color: var(--p-bright); }
+    .port-live-note { font-size: 0.78rem; color: rgba(255,255,255,0.35); font-weight: 300; position: relative; }
+
+    /* Footer override */
+    .footer { background: var(--p-bg) !important; border-top: 1px solid var(--p-border) !important; }
+    .footer p { color: var(--p-muted) !important; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .port-hero-inner { grid-template-columns: 1fr; }
+      .port-hero-aside { display: none; }
+      .port-ghost-num { display: none; }
+      .port-ds-grid { grid-template-columns: 1fr; }
+      .port-process-strip { grid-template-columns: 1fr 1fr; }
+      .port-two-up { grid-template-columns: 1fr; }
+      .port-features-row { grid-template-columns: 1fr; gap: 24px; }
+    }
+    @media (max-width: 560px) {
+      .port-container { padding: 0 20px; }
+      .port-hero-inner { padding: 0 20px; }
+      .port-process-strip { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand brand-full" href="index.html">Kian Jadbabaei</a>
+    <nav class="nav" aria-label="Primary">
+      <a class="resume-link" href="index.html#projects"><span class="arrow">←</span> Back to Projects</a>
+      <a class="github-link" href="https://github.com/kianjad/portfolio" target="_blank" rel="noopener" aria-label="View on GitHub"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ══ HERO ══ -->
+<section class="port-hero">
+  <div class="port-hero-bg"></div>
+  <span class="port-ghost-num" aria-hidden="true">05</span>
+
+  <div class="port-hero-inner">
+    <div>
+      <div class="port-eyebrow">
+        <span class="port-tag">Web Development</span>
+        <span class="port-eyebrow-line"></span>
+        <span class="port-eyebrow-date">Feb 2026</span>
+      </div>
+      <h1 class="port-title">Portfolio<br><em>Website</em></h1>
+      <p class="port-desc">You're looking at it. Built from scratch in VS Code using vanilla HTML, CSS, and JavaScript.</p>
+      <div class="port-skills">
+        <span>HTML</span><span>CSS</span><span>JavaScript</span>
+        <span>UI Design</span>
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+
+<!-- ══ HOW IT WAS BUILT ══ -->
+<section class="port-section">
+  <div class="port-container">
+    <div class="port-section-label">How it was built</div>
+    <div class="port-process-strip">
+      <div class="port-process-step">
+        <span class="port-process-num" aria-hidden="true">1</span>
+        <div class="port-process-step-label">Step 01</div>
+        <h4>Design first</h4>
+        <p>Picked the colors, fonts, and spacing before writing any HTML. Easier to code toward something than to figure it out as you go.</p>
+      </div>
+      <div class="port-process-step">
+        <span class="port-process-num" aria-hidden="true">2</span>
+        <div class="port-process-step-label">Step 02</div>
+        <h4>One stylesheet</h4>
+        <p>All shared styles in styles.css. Each project page only adds its own styles in a small inline block at the top.</p>
+      </div>
+      <div class="port-process-step">
+        <span class="port-process-num" aria-hidden="true">3</span>
+        <div class="port-process-step-label">Step 03</div>
+        <h4>Project pages</h4>
+        <p>Each project is its own HTML file with a hero, sticky tabs, and content panels. Tab switching is about 10 lines of JavaScript.</p>
+      </div>
+      <div class="port-process-step">
+        <span class="port-process-num" aria-hidden="true">4</span>
+        <div class="port-process-step-label">Step 04</div>
+        <h4>Live embeds</h4>
+        <p>The Spotify and Crypto projects have Streamlit apps embedded via iframes on a dedicated Live App tab.</p>
+      </div>
+      <div class="port-process-step">
+        <span class="port-process-num" aria-hidden="true">5</span>
+        <div class="port-process-step-label">Step 05</div>
+        <h4>GitHub Pages</h4>
+        <p>Static files, no build step. Push to main and it's live within a minute.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FILE STRUCTURE ══ -->
+<section class="port-section">
+  <div class="port-container">
+    <div class="port-section-label">File Structure</div>
+    <div class="port-two-up">
+    <div class="port-two-cell" style="grid-column: 1 / -1;">
+        <div class="port-file-tree">
+          <span class="dir">KIAN_SITE/</span>
+          <span class="indent html">index.html</span>
+          <span class="indent html">project-crypto.html</span>
+          <span class="indent html">project-spotify.html</span>
+          <span class="indent html">project-rng.html</span>
+          <span class="indent html">project-soda.html</span>
+          <span class="indent html">project-portfolio.html</span>
+          <span class="indent css">styles.css</span>
+          <span class="indent js">script.js</span>
+          <span class="indent img">portrait.jpg</span>
+          <span class="indent img">crypto-thumbnail.png</span>
+          <span class="indent img">spotify-thumbnail.jpg</span>
+          <span class="indent img">rng-thumbnail.jpg</span>
+          <span class="indent img">soda-thumbnail.jpg</span>
+          <span class="indent img">project-portfolio-thumbnail.png</span>
+          <span class="indent img">soda_interaction_plot.png</span>
+          <span class="indent img">soda_power_curve.png</span>
+          <span class="indent img">soda_diagnostics.png</span>
+          <span class="indent img">00_model_comparison.png ...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LIVE SITE ══ -->
+<section class="port-section">
+  <div class="port-container">
+    <div class="port-section-label">Live Site</div>
+    <div class="port-live">
+      <span class="port-live-label">Hosted on GitHub Pages</span>
+      <a class="port-live-url" href="https://kianjad.github.io/portfolio" target="_blank" rel="noopener">kianjad.github.io/portfolio</a>
+      <p class="port-live-note">Link will be active once the repo is published.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© 2026 Kian Jadbabaei</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
