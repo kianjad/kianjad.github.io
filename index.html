@@ -353,33 +353,20 @@
     </div>
   </footer>
 
-  <div id="mobile-banner" style="
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background: rgba(26,22,18,0.92);
-    color: rgba(245,240,232,0.9);
-    font-size: 0.82rem;
-    font-family: var(--sans);
-    padding: 12px 20px;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    letter-spacing: 0.01em;
-  ">
-    Best viewed on a larger screen
-    <button onclick="document.getElementById('mobile-banner').style.display='none'" style="
-      background: none;
-      border: none;
-      color: rgba(245,240,232,0.6);
-      font-size: 1rem;
-      cursor: pointer;
-      margin-left: 12px;
-      line-height: 1;
-      vertical-align: middle;
-    ">×</button>
-  </div>
+  <script>
+    if (window.innerWidth < 768) {
+      const banner = document.createElement('div');
+      banner.innerHTML = 'Best viewed on a larger screen <button onclick="this.parentElement.remove()" style="background:none;border:none;color:rgba(245,240,232,0.6);font-size:1rem;cursor:pointer;margin-left:12px;">×</button>';
+      Object.assign(banner.style, {
+        position: 'fixed', bottom: '0', left: '0', right: '0', zIndex: '100',
+        background: 'rgba(26,22,18,0.92)', color: 'rgba(245,240,232,0.9)',
+        fontSize: '0.82rem', padding: '12px 20px', textAlign: 'center',
+        backdropFilter: 'blur(10px)', letterSpacing: '0.01em'
+      });
+      document.body.appendChild(banner);
+    }
+  </script>
 
-  <script d
+  <script src="script.js"></script>
+</body>
+</html>
