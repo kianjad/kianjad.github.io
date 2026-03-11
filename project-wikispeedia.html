@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wikispeedia Network Analysis - Kian Jadbabaei</title>
+  <meta name="description" content="A graph-theoretic analysis of the Wikispeedia Wikipedia hyperlink network: community detection, centrality, and Monte Carlo validation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7T1MLMVLRP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-7T1MLMVLRP');
+  </script>
+
+  <style>
+    /* ── FONT OVERRIDES ── */
+    .wiki-page, .wiki-page * {
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    :root {
+      --w-bg:        #f0f4f8;
+      --w-bg-2:      #e4eaf0;
+      --w-surface:   #ffffff;
+      --w-surface-2: #f7f9fc;
+      --w-border:    rgba(58,90,120,0.13);
+      --w-border-2:  rgba(58,90,120,0.22);
+      --w-ink:       #1a2636;
+      --w-ink-2:     #3a5272;
+      --w-ink-3:     #6b88a4;
+      --w-node:      #2563a8;
+      --w-node-2:    #1e7d52;
+      --w-accent:    #b84c2c;
+      --w-gold:      #9a6f1e;
+      --w-node-bg:   rgba(37,99,168,0.07);
+      --w-green-bg:  rgba(30,125,82,0.07);
+      --w-accent-bg: rgba(184,76,44,0.07);
+      --w-gold-bg:   rgba(154,111,30,0.08);
+      --w-serif:     'Playfair Display', Georgia, serif;
+      --w-mono:      'IBM Plex Mono', 'Courier New', monospace;
+    }
+
+    body.wiki-page {
+      background:
+        radial-gradient(ellipse 160% 100% at 30% 10%, rgba(37,99,168,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 140% 90% at 75% 85%, rgba(30,125,82,0.06) 0%, transparent 55%),
+        var(--w-bg);
+      background-attachment: fixed;
+      color: var(--w-ink);
+      -webkit-font-smoothing: antialiased;
+    }
+    body.wiki-page .grain { opacity: 0.022; }
+    body.wiki-page .topbar {
+      background: rgba(240,244,248,0.93);
+      border-bottom: 1px solid var(--w-border-2);
+      font-family: 'Inter', sans-serif;
+    }
+    body.wiki-page .brand-full {
+      color: var(--w-ink);
+      font-family: var(--w-serif);
+      font-weight: 600;
+    }
+    body.wiki-page .brand-full:hover { color: var(--w-node); }
+    body.wiki-page .resume-link { color: var(--w-ink-3); font-family: 'Inter', sans-serif; font-size: 0.88rem; }
+    body.wiki-page .resume-link:hover { color: var(--w-node); }
+    body.wiki-page .github-link {
+      color: var(--w-ink-2);
+      border-color: var(--w-border-2);
+      background: var(--w-surface);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+    }
+    body.wiki-page .github-link:hover {
+      color: var(--w-node);
+      border-color: var(--w-node);
+      background: var(--w-node-bg);
+    }
+    body.wiki-page .footer {
+      background: #d8e2ec;
+      border-top: 2px solid #b8c8d8;
+      font-family: 'Inter', sans-serif;
+      padding: 28px 0;
+    }
+    body.wiki-page .footer p {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: #1a2636;
+    }
+
+    .wiki-article { max-width: 860px; margin: 0 auto; }
+
+    /* HERO */
+    .wiki-hero {
+      padding: 90px 0 80px;
+      background:
+        radial-gradient(ellipse 80% 120% at 10% 50%, rgba(37,99,168,0.35) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 20%, rgba(30,125,82,0.2) 0%, transparent 55%),
+        linear-gradient(160deg, #0f1e30 0%, #162844 50%, #0e2236 100%);
+      border-bottom: none;
+      position: relative;
+      overflow: hidden;
+    }
+    /* subtle grid texture overlay */
+    .wiki-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+    .wiki-hero .wiki-article { position: relative; z-index: 1; }
+
+    .wiki-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .wiki-eyebrow-tag {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+      color: #7eb8f7; background: rgba(37,99,168,0.25);
+      border: 1px solid rgba(126,184,247,0.3); padding: 4px 11px; border-radius: 3px;
+    }
+    .wiki-eyebrow-sep { color: rgba(255,255,255,0.25); font-size: 0.8rem; }
+    .wiki-eyebrow-date { color: rgba(255,255,255,0.45); font-size: 0.82rem; letter-spacing: 0.03em; font-weight: 400; }
+
+    .wiki-hero-title {
+      font-family: var(--w-serif);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 700;
+      letter-spacing: -0.025em; line-height: 1.06;
+      color: #ffffff; margin-bottom: 22px; max-width: 740px;
+    }
+    .wiki-hero-title em { font-style: italic; color: #7eb8f7; font-weight: 400; }
+    .wiki-hero-desc {
+      color: rgba(255,255,255,0.62); font-size: 1.05rem; font-weight: 300;
+      line-height: 1.74; max-width: 580px; margin-bottom: 0;
+      letter-spacing: 0.01em;
+    }
+
+    /* section numbers hidden */
+    .wiki-section-num { display: none; }
+
+    /* STAT BAR */
+    .net-stats {
+      display: flex;
+      border: 1px solid var(--w-border-2); border-radius: 6px;
+      overflow: hidden; background: var(--w-surface); max-width: 620px;
+      box-shadow: 0 2px 12px rgba(37,99,168,0.08);
+    }
+    .net-stat { flex: 1; padding: 16px 18px; border-right: 1px solid var(--w-border); text-align: center; }
+    .net-stat:last-child { border-right: none; }
+    .net-stat-val {
+      font-family: var(--w-mono); font-size: 1.15rem;
+      color: var(--w-node); display: block; line-height: 1; margin-bottom: 6px; font-weight: 500;
+    }
+    .net-stat-label { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--w-ink-3); font-weight: 600; }
+
+    /* SECTIONS */
+    .wiki-section     { padding: 72px 0; border-top: 1px solid var(--w-border); }
+    .wiki-section-alt { padding: 72px 0; border-top: 1px solid var(--w-border); background: var(--w-surface-2); }
+    .wiki-section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 32px; }
+    .wiki-section-title { margin-left: 0; }
+    .wiki-section-num {
+      font-family: var(--w-mono); font-size: 0.72rem;
+      color: var(--w-node); opacity: 0.6; letter-spacing: 0.04em;
+    }
+    .wiki-section-title {
+      font-family: var(--w-serif); font-size: clamp(1.5rem, 2.4vw, 1.95rem);
+      font-weight: 600; letter-spacing: -0.01em; color: var(--w-ink); line-height: 1.15;
+    }
+
+    /* BODY TEXT */
+    .wiki-body {
+      color: var(--w-ink-2); font-size: 0.975rem; line-height: 1.78;
+      font-weight: 400; max-width: 72ch; letter-spacing: 0.008em;
+    }
+    .wiki-body + .wiki-body { margin-top: 14px; }
+    .wiki-body strong { color: var(--w-ink); font-weight: 600; }
+    .wiki-body em { color: var(--w-node); font-style: italic; }
+    .wiki-body code {
+      font-family: var(--w-mono); font-size: 0.83em;
+      color: var(--w-node-2); background: var(--w-green-bg); padding: 1px 6px; border-radius: 3px;
+    }
+
+    /* METRIC GRID */
+    .metric-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 28px 0; }
+    .metric-card {
+      background: var(--w-surface); border: 1px solid var(--w-border);
+      border-radius: 6px; padding: 20px 16px; text-align: center;
+      box-shadow: 0 1px 4px rgba(37,99,168,0.05);
+      transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .metric-card:hover { box-shadow: 0 4px 20px rgba(37,99,168,0.1); border-color: var(--w-border-2); transform: translateY(-2px); }
+    .metric-val { font-family: var(--w-mono); font-size: 1.45rem; color: var(--w-node); display: block; line-height: 1; margin-bottom: 7px; font-weight: 500; }
+    .metric-val.green  { color: var(--w-node-2); }
+    .metric-val.gold   { color: var(--w-gold); }
+    .metric-val.accent { color: var(--w-accent); }
+    .metric-label { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--w-ink-3); font-weight: 600; display: block; margin-bottom: 5px; }
+    .metric-sub { font-size: 0.72rem; color: var(--w-ink-3); line-height: 1.45; margin-top: 6px; }
+
+    /* CALLOUT */
+    .wiki-callout { border-left: 3px solid var(--w-node); padding: 16px 22px; background: var(--w-node-bg); border-radius: 0 6px 6px 0; margin: 28px 0; }
+    .wiki-callout.green { border-left-color: var(--w-node-2); background: var(--w-green-bg); }
+    .wiki-callout.gold  { border-left-color: var(--w-gold); background: var(--w-gold-bg); }
+    .wiki-callout p { color: var(--w-ink-2); font-size: 0.95rem; line-height: 1.72; }
+    .wiki-callout p strong { color: var(--w-ink); font-weight: 600; }
+    .wiki-callout p em { color: var(--w-node); font-style: italic; }
+
+    /* TABLE */
+    .wiki-table-wrap { margin: 24px 0; border: 1px solid var(--w-border-2); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 6px rgba(37,99,168,0.06); }
+    .wiki-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .wiki-table thead tr { background: var(--w-bg-2); }
+    .wiki-table th { padding: 11px 16px; text-align: left; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; color: var(--w-ink-3); }
+    .wiki-table td { padding: 10px 16px; border-top: 1px solid var(--w-border); color: var(--w-ink-2); vertical-align: middle; background: var(--w-surface); }
+    .wiki-table tr:hover td { background: var(--w-node-bg); }
+    .rank     { font-family: var(--w-mono); font-size: 0.76rem; color: var(--w-ink-3); }
+    .node-name{ font-family: var(--w-mono); font-size: 0.82rem; color: var(--w-node); }
+    .val-num  { font-family: var(--w-mono); font-size: 0.82rem; color: var(--w-ink); font-weight: 500; }
+    .sub-mod  { font-family: var(--w-mono); font-size: 0.82rem; color: var(--w-node); font-weight: 500; }
+    .bar-wrap { width: 100%; height: 4px; background: var(--w-bg-2); border-radius: 2px; overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--w-node), var(--w-node-2)); border-radius: 2px; }
+
+    /* ALGO TRIO */
+    .algo-trio { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 28px 0; align-items: start; }
+    .algo-card {
+      background: var(--w-surface); border: 1px solid var(--w-border);
+      border-radius: 6px; padding: 22px 20px; position: relative;
+      box-shadow: 0 1px 5px rgba(37,99,168,0.05);
+      transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .algo-card-top { min-height: 26px; margin-bottom: 10px; }
+    .algo-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--w-node), var(--w-node-2));
+      opacity: 0; transition: opacity 0.2s; border-radius: 6px 6px 0 0;
+    }
+    .algo-card:hover { box-shadow: 0 6px 24px rgba(37,99,168,0.1); border-color: var(--w-border-2); transform: translateY(-2px); }
+    .algo-card:hover::before { opacity: 1; }
+    .algo-card.best-card { border-color: rgba(37,99,168,0.3); }
+    .algo-card.best-card::before { opacity: 1; }
+    .algo-badge {
+      font-size: 0.63rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--w-node-2); background: var(--w-green-bg);
+      border: 1px solid rgba(30,125,82,0.25); padding: 3px 8px; border-radius: 3px;
+      display: inline-block;
+    }
+    .algo-name { font-family: var(--w-serif); font-size: 1.18rem; font-weight: 600; color: var(--w-ink); margin-bottom: 10px; }
+    .algo-communities { font-family: var(--w-mono); font-size: 2.1rem; color: var(--w-node); line-height: 1; margin-bottom: 2px; font-weight: 500; }
+    .algo-comm-label { font-size: 0.66rem; color: var(--w-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; font-weight: 500; }
+    .algo-mod-row { display: flex; align-items: center; gap: 10px; }
+    .algo-mod-label { font-size: 0.66rem; color: var(--w-ink-3); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; font-weight: 500; }
+    .algo-mod-val { font-family: var(--w-mono); font-size: 0.9rem; color: var(--w-gold); font-weight: 500; flex-shrink: 0; }
+    .algo-mod-bar { flex: 1; height: 3px; background: var(--w-bg-2); border-radius: 2px; overflow: hidden; }
+    .algo-mod-fill { height: 100%; background: linear-gradient(90deg, var(--w-gold), var(--w-node)); border-radius: 2px; }
+
+    /* VIZ GRID */
+    .viz-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 24px 0; }
+    .viz-card {
+      background: var(--w-surface); border: 1px solid var(--w-border);
+      border-radius: 6px; overflow: hidden;
+      box-shadow: 0 1px 5px rgba(37,99,168,0.05);
+      transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .viz-card:hover { box-shadow: 0 4px 18px rgba(37,99,168,0.1); border-color: var(--w-border-2); transform: translateY(-2px); }
+    .viz-img-wrap { width: 100%; overflow: hidden; background: var(--w-bg-2); }
+    .viz-img-wrap img { width: 100%; display: block; object-fit: contain; }
+    .viz-label {
+      padding: 10px 14px;
+      font-size: 0.78rem; font-weight: 600; color: var(--w-ink-2);
+      border-top: 1px solid var(--w-border);
+      letter-spacing: 0.01em;
+    }
+    .viz-label span { font-family: var(--w-mono); color: var(--w-node); font-size: 0.68rem; font-weight: 400; display: block; margin-top: 2px; }
+
+    /* SINGLE WIDE IMAGE */
+    .viz-single {
+      background: var(--w-surface); border: 1px solid var(--w-border);
+      border-radius: 6px; overflow: hidden; margin: 24px 0;
+      box-shadow: 0 1px 5px rgba(37,99,168,0.05);
+    }
+    .viz-single img { width: 100%; display: block; object-fit: contain; }
+    .viz-single-label {
+      padding: 11px 16px; font-size: 0.78rem; font-weight: 600;
+      color: var(--w-ink-2); border-top: 1px solid var(--w-border);
+    }
+    .viz-single-label span { font-family: var(--w-mono); color: var(--w-ink-3); font-size: 0.68rem; font-weight: 400; display: block; margin-top: 2px; }
+
+    /* DEGREE DIST - now real images side by side */
+    .dist-img-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+
+    /* COMMUNITY LIST */
+    .community-list { display: flex; flex-direction: column; gap: 9px; margin: 24px 0; }
+    .community-row {
+      display: grid; grid-template-columns: 118px 46px 1fr auto;
+      align-items: center; gap: 16px;
+      background: var(--w-surface); border: 1px solid var(--w-border);
+      border-radius: 6px; padding: 13px 18px;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .community-row:hover { border-color: var(--w-border-2); box-shadow: 0 2px 10px rgba(37,99,168,0.07); }
+    .comm-name { font-family: var(--w-mono); font-size: 0.76rem; color: var(--w-ink-3); }
+    .comm-size { font-family: var(--w-mono); font-size: 1.1rem; color: var(--w-node); font-weight: 500; }
+    .cat-pill { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 0.7rem; margin-right: 4px; margin-bottom: 2px; font-weight: 600; }
+    .cat-geo  { background: rgba(37,99,168,0.1);  color: var(--w-node); }
+    .cat-sci  { background: rgba(30,125,82,0.1);  color: var(--w-node-2); }
+    .cat-ppl  { background: rgba(184,76,44,0.1);  color: var(--w-accent); }
+    .cat-hist { background: rgba(154,111,30,0.1); color: var(--w-gold); }
+    .cat-life { background: rgba(100,70,160,0.09); color: #6446a0; }
+    .cat-cit  { background: var(--w-bg-2); color: var(--w-ink-3); }
+    .comm-sub { font-size: 0.69rem; font-family: var(--w-mono); color: var(--w-ink-3); text-align: right; }
+
+    /* EDGE TABLE */
+    .edge-wrap { background: var(--w-surface); border: 1px solid var(--w-border-2); border-radius: 6px; overflow: hidden; margin: 24px 0; box-shadow: 0 1px 6px rgba(37,99,168,0.06); }
+    .edge-row { display: grid; grid-template-columns: 28px 1fr auto 1fr 1fr; align-items: center; gap: 12px; padding: 11px 18px; border-top: 1px solid var(--w-border); transition: background 0.12s; }
+    .edge-row:first-child { border-top: none; }
+    .edge-row:hover { background: var(--w-node-bg); }
+    .edge-row.edge-head { background: var(--w-bg-2); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--w-ink-3); font-weight: 600; }
+    .edge-row.edge-head:hover { background: var(--w-bg-2); }
+    .e-rank { font-family: var(--w-mono); font-size: 0.75rem; color: var(--w-ink-3); }
+    .e-from { font-family: var(--w-mono); font-size: 0.8rem; color: var(--w-node); }
+    .e-arrow { color: var(--w-ink-3); font-size: 0.78rem; text-align: center; }
+    .e-to   { font-family: var(--w-mono); font-size: 0.8rem; color: var(--w-ink-2); }
+    .e-btw  { font-family: var(--w-mono); font-size: 0.8rem; color: var(--w-gold); font-weight: 500; text-align: right; }
+
+    /* MONTE CARLO - real image */
+    .mc-wrap { background: var(--w-surface); border: 1px solid var(--w-border-2); border-radius: 8px; overflow: hidden; margin: 28px 0; box-shadow: 0 2px 12px rgba(37,99,168,0.07); }
+    .mc-img { width: 100%; display: block; object-fit: contain; }
+    .mc-footer {
+      padding: 14px 20px; border-top: 1px solid var(--w-border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .mc-footer-label { font-size: 0.78rem; font-weight: 600; color: var(--w-ink-2); }
+    .mc-footer-label span { font-family: var(--w-mono); color: var(--w-ink-3); font-size: 0.7rem; font-weight: 400; display: block; margin-top: 2px; }
+    .mc-badge { background: var(--w-green-bg); border: 1px solid rgba(30,125,82,0.28); border-radius: 5px; padding: 8px 16px; text-align: center; }
+    .mc-badge-val { font-family: var(--w-mono); font-size: 1.2rem; color: var(--w-node-2); display: block; margin-bottom: 2px; font-weight: 500; }
+    .mc-badge-label { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--w-ink-3); font-weight: 500; }
+
+    /* TECH PILLS */
+    .tech-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 26px; }
+    .tech-pill { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 11px; border-radius: 3px; border: 1px solid var(--w-border-2); color: var(--w-ink-3); background: var(--w-surface); }
+    .tech-pill.r  { border-color: rgba(37,99,168,0.3); color: var(--w-node); background: var(--w-node-bg); }
+    .tech-pill.ig { border-color: rgba(30,125,82,0.3); color: var(--w-node-2); background: var(--w-green-bg); }
+    .tech-pill.lv { border-color: rgba(154,111,30,0.3); color: var(--w-gold); background: var(--w-gold-bg); }
+
+    /* SUBSECTION HEADING */
+    .wiki-sub-heading {
+      font-family: var(--w-serif); font-size: 1.1rem; font-weight: 600;
+      color: var(--w-ink); margin: 36px 0 10px; letter-spacing: -0.01em;
+    }
+
+    /* REVEAL */
+    .wiki-reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16,1,0.3,1); }
+    .wiki-reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* LEGEND COMPACT */
+    .legend-compact {
+      max-width: 360px; margin: 20px 0;
+      background: var(--w-surface); border: 1px solid var(--w-border);
+      border-radius: 6px; overflow: hidden;
+      box-shadow: 0 1px 5px rgba(37,99,168,0.05);
+      cursor: zoom-in; transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .legend-compact:hover { box-shadow: 0 4px 18px rgba(37,99,168,0.12); border-color: var(--w-border-2); }
+    .legend-compact img { width: 100%; display: block; object-fit: contain; }
+
+    /* CLICKABLE IMAGES */
+    .zoomable { cursor: zoom-in; transition: opacity 0.15s; }
+    .zoomable:hover { opacity: 0.88; }
+    .viz-card, .viz-single, .dist-img-pair .viz-card { cursor: zoom-in; }
+
+    /* LIGHTBOX */
+    .lb-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(10,18,28,0.88); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .lb-overlay.open { display: flex; }
+    .lb-box {
+      position: relative; max-width: min(92vw, 1100px); max-height: 92vh;
+      display: flex; flex-direction: column; align-items: center;
+      animation: lbIn 0.18s cubic-bezier(0.16,1,0.3,1);
+    }
+    @keyframes lbIn { from { opacity:0; transform: scale(0.94); } to { opacity:1; transform: scale(1); } }
+    .lb-img {
+      max-width: 100%; max-height: calc(92vh - 52px);
+      border-radius: 6px; display: block;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      object-fit: contain;
+    }
+    .lb-caption {
+      margin-top: 12px; color: rgba(255,255,255,0.6);
+      font-size: 0.8rem; letter-spacing: 0.03em; text-align: center;
+    }
+    .lb-close {
+      position: absolute; top: -14px; right: -14px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+      color: white; font-size: 1rem; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .lb-close:hover { background: rgba(255,255,255,0.28); }
+
+    @media (max-width: 760px) {
+      .metric-grid { grid-template-columns: repeat(2,1fr); }
+      .viz-grid { grid-template-columns: 1fr; }
+      .dist-img-pair { grid-template-columns: 1fr; }
+      .community-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .comm-sub { display: none; }
+      .edge-row { grid-template-columns: 1fr 1fr 1fr; }
+      .e-rank, .e-arrow { display: none; }
+    }
+  </style>
+</head>
+<body class="wiki-page">
+
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand brand-full" href="index.html">Kian Jadbabaei</a>
+      <nav class="nav" aria-label="Primary">
+        <a class="resume-link" href="index.html#projects"><span class="arrow">←</span> Back to Projects</a>
+        <a class="github-link" href="https://github.com/kianjad/Wikispeedia-Network-Analysis" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+          View Repo
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="wiki-hero">
+      <div class="container">
+        <div class="wiki-article">
+          <div class="wiki-eyebrow wiki-reveal">
+            <span class="wiki-eyebrow-tag">Network Analysis</span>
+            <span class="wiki-eyebrow-sep">·</span>
+            <span class="wiki-eyebrow-date">March 2026</span>
+          </div>
+          <h1 class="wiki-hero-title wiki-reveal" style="transition-delay:60ms;">
+            A Network Analysis of <em>Wikispeedia</em>
+          </h1>
+          <p class="wiki-hero-desc wiki-reveal" style="transition-delay:110ms;">
+            Treating the Wikipedia hyperlink graph behind Wikispeedia as a directed network of 4,592 nodes and 119,882 edges. We mapped its communities, hubs, and small-world structure using igraph in R.
+          </p>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 01 OVERVIEW -->
+    <section class="wiki-section">
+      <div class="container">
+        <div class="wiki-article">
+          <div class="wiki-section-header wiki-reveal">
+            <span class="wiki-section-num">01</span>
+            <h2 class="wiki-section-title">Overview</h2>
+          </div>
+          <p class="wiki-body wiki-reveal">
+            <strong>Wikispeedia</strong> is an online game created by Robert West and Jure Leskovec at Stanford where players navigate from one Wikipedia article to another using only embedded hyperlinks. The game runs on a condensed snapshot of Wikipedia: <em>4,604 articles</em> with over 119,000 hyperlinks. We treated this hyperlink structure as a <strong>directed network</strong> to study how information is organized and connected at scale.
+          </p>
+          <p class="wiki-body wiki-reveal" style="transition-delay:50ms;">
+            Our analysis targeted four questions: how dense and connected is the network, which articles act as the most important structural hubs, do topically related articles cluster into communities, and is that community structure statistically meaningful rather than a product of random chance?
+          </p>
+          <div class="tech-pills wiki-reveal" style="transition-delay:90ms;">
+            <span class="tech-pill r">R</span>
+            <span class="tech-pill ig">igraph</span>
+            <span class="tech-pill lv">Louvain</span>
+            <span class="tech-pill">dplyr</span>
+            <span class="tech-pill">SNAP Dataset</span>
+            <span class="tech-pill">Monte Carlo</span>
+            <span class="tech-pill">Community Detection</span>
+            <span class="tech-pill">Network Science</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 GLOBAL METRICS -->
+    <section class="wiki-section-alt">
+      <div class="container">
+        <div class="wiki-article">
+          <div class="wiki-section-header wiki-reveal">
+            <span class="wiki-section-num">02</span>
+            <h2 class="wiki-section-title">Global Network Metrics</h2>
+          </div>
+          <p class="wiki-body wiki-reveal">Before diving into community structure, we computed standard whole-network metrics to characterize the graph's shape and connectivity.</p>
+
+          <div class="metric-grid wiki-reveal" style="transition-delay:50ms;">
+            <div class="metric-card">
+              <span class="metric-val">9</span>
+              <span class="metric-label">Diameter (SCC)</span>
+              <p class="metric-sub">Maximum shortest path in the largest strongly connected component</p>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val green">3.181</span>
+              <span class="metric-label">Avg. Path Length</span>
+              <p class="metric-sub">Mean clicks needed to traverse the largest SCC</p>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val gold">0.00569</span>
+              <span class="metric-label">Density</span>
+              <p class="metric-sub">Sparse, typical for information networks of this scale</p>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val accent">0.221</span>
+              <span class="metric-label">Reciprocity</span>
+              <p class="metric-sub">~22% of directed links are mutually cross-referenced</p>
+            </div>
+          </div>
+
+          <div class="wiki-callout wiki-reveal">
+            <p>The <strong>average path length of 3.18 hops</strong> within the largest strongly connected component explains why Wikispeedia works as a game. From nearly any article, players can reach nearly any other in just 3 to 4 clicks, the same "six degrees of separation" phenomenon found in social networks, compressed into a domain-specific information graph.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 CENTRALITY -->
+    <section class="wiki-section">
+      <div class="container">
+        <div class="wiki-article">
+          <div class="wiki-section-header wiki-reveal">
+            <span class="wiki-section-num">03</span>
+            <h2 class="wiki-section-title">Network Hubs &amp; Centrality</h2>
+          </div>
+          <p class="wiki-body wiki-reveal">
+            We computed three centrality measures: <strong>in-degree</strong>, <strong>betweenness</strong>, and <strong>eigenvector centrality</strong>, each capturing a different notion of importance. The same handful of broad articles dominate all three rankings.
+          </p>
+
+          <div class="wiki-table-wrap wiki-reveal" style="transition-delay:50ms; margin-top:24px;">
+            <table class="wiki-table">
+              <thead>
+                <tr><th>#</th><th>Article</th><th>In-Degree</th><th style="width:110px;">Relative</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="rank">01</td><td class="node-name">United_States</td><td class="val-num">1,551</td><td><div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div></td></tr>
+                <tr><td class="rank">02</td><td class="node-name">United_Kingdom</td><td class="val-num">972</td><td><div class="bar-wrap"><div class="bar-fill" style="width:62.7%"></div></div></td></tr>
+                <tr><td class="rank">03</td><td class="node-name">France</td><td class="val-num">959</td><td><div class="bar-wrap"><div class="bar-fill" style="width:61.8%"></div></div></td></tr>
+                <tr><td class="rank">04</td><td class="node-name">Europe</td><td class="val-num">933</td><td><div class="bar-wrap"><div class="bar-fill" style="width:60.2%"></div></div></td></tr>
+                <tr><td class="rank">05</td><td class="node-name">England</td><td class="val-num">751</td><td><div class="bar-wrap"><div class="bar-fill" style="width:48.4%"></div></div></td></tr>
+                <tr><td class="rank">06</td><td class="node-name">World_War_II</td><td class="val-num">751</td><td><div class="bar-wrap"><div class="bar-fill" style="width:48.4%"></div></div></td></tr>
+                <tr><td class="rank">07</td><td class="node-name">Germany</td><td class="val-num">743</td><td><div class="bar-wrap"><div class="bar-fill" style="width:47.9%"></div></div></td></tr>
+                <tr><td class="rank">08</td><td class="node-name">India</td><td class="val-num">611</td><td><div class="bar-wrap"><div class="bar-fill" style="width:39.4%"></div></div></td></tr>
+                <tr><td class="rank">09</td><td class="node-name">English_language</td><td class="val-num">598</td><td><div class="bar-wrap"><div class="bar-fill" style="width:38.6%"></div></div></td></tr>
+                <tr><td class="rank">10</td><td class="node-name">London</td><td class="val-num">587</td><td><div class="bar-wrap"><div class="bar-fill" style="width:37.8%"></div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="wiki-body wiki-reveal" style="margin-top:24px;">
+            The <strong>in-degree distribution is heavy-tailed</strong> on a log-log plot: a small number of broad articles absorb almost all incoming links while most receive very few. This scale-free signature is the same found in the World Wide Web and social networks. The out-degree distribution is bell-shaped on a log-log plot, peaking around 10 to 20 outgoing links per article.
+          </p>
+
+          <div class="dist-img-pair wiki-reveal" style="transition-delay:50ms;">
+            <div class="viz-card" onclick="openLightbox('in-degree.png','In-Degree Distribution (log-log)')">
+              <div class="viz-img-wrap"><img class="zoomable" src="in-degree.png" alt="In-Degree Distribution log-log plot" /></div>
+              <div class="viz-label">In-Degree Distribution<span>log-log scale</span></div>
+            </div>
+            <div class="viz-card" onclick="openLightbox('out-degree.png','Out-Degree Distribution (log-log)')">
+              <div class="viz-img-wrap"><img class="zoomable" src="out-degree.png" alt="Out-Degree Distribution log-log plot" /></div>
+              <div class="viz-label">Out-Degree Distribution<span>log-log scale</span></div>
+            </div>
+          </div>
+
+          <h3 class="wiki-sub-heading wiki-reveal">Top Edges by Betweenness</h3>
+          <p class="wiki-body wiki-reveal">
+            Edge betweenness counts how many shortest paths pass through each edge. High-betweenness edges act as <strong>bridges between subject domains</strong>; removing them would substantially lengthen cross-domain navigation.
+          </p>
+
+          <div class="edge-wrap wiki-reveal" style="transition-delay:50ms;">
+            <div class="edge-row edge-head">
+              <span>#</span><span>From</span><span></span><span>To</span><span style="text-align:right;">Betweenness</span>
+            </div>
+            <div class="edge-row"><span class="e-rank">1</span><span class="e-from">United_States</span><span class="e-arrow">→</span><span class="e-to">History_of_slavery</span><span class="e-btw">59,856</span></div>
+            <div class="edge-row"><span class="e-rank">2</span><span class="e-from">United_States</span><span class="e-arrow">→</span><span class="e-to">Cinema_of_the_United_States</span><span class="e-btw">47,508</span></div>
+            <div class="edge-row"><span class="e-rank">3</span><span class="e-from">History_of_slavery</span><span class="e-arrow">→</span><span class="e-to">History_of_Puerto_Rico</span><span class="e-btw">45,854</span></div>
+            <div class="edge-row"><span class="e-rank">4</span><span class="e-from">United_States</span><span class="e-arrow">→</span><span class="e-to">Amtrak</span><span class="e-btw">40,755</span></div>
+            <div class="edge-row"><span class="e-rank">5</span><span class="e-from">Animal</span><span class="e-arrow">→</span><span class="e-to">Australian_Green_Tree_Frog</span><span class="e-btw">30,917</span></div>
+            <div class="edge-row"><span class="e-rank">6</span><span class="e-from">Earth</span><span class="e-arrow">→</span><span class="e-to">Dinosaur</span><span class="e-btw">29,183</span></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 COMMUNITY DETECTION -->
+    <section class="wiki-section-alt">
+      <div class="container">
+        <div class="wiki-article">
+          <div class="wiki-section-header wiki-reveal">
+            <span class="wiki-section-num">04</span>
+            <h2 class="wiki-section-title">Community Detection</h2>
+          </div>
+          <p class="wiki-body wiki-reveal">
+            We ran three community detection algorithms on an undirected version of a 200-node induced subgraph (sub1). All three produced <strong>high modularity scores well above zero</strong>, indicating genuine community structure rather than random organization.
+          </p>
+
+          <!-- sub1 network layout visualizations -->
+          <h3 class="wiki-sub-heading wiki-reveal">sub1 Network Layouts</h3>
+          <p class="wiki-body wiki-reveal">To understand the structure of the network visually, we applied three different layout algorithms to sub1, a 200-node random sample. Nodes are colored by their top-level Wikipedia category and sized proportionally to their total degree. Each layout reveals different structural properties of the same underlying graph.</p>
+          <p class="wiki-body wiki-reveal" style="margin-top:12px;"><strong>Fruchterman-Reingold</strong> spreads nodes evenly using a force-directed approach, naturally pulling well-connected nodes toward the center and pushing more isolated nodes to the outside. Hub articles with many edges sit at the center of their clusters. <strong>Kamada-Kawai</strong> places nodes so that graph-theoretic distances match geometric distances, meaning articles that are close in the network appear close on the plot. This tends to separate peripheral nodes more clearly than FR. The <strong>Circular</strong> layout places all nodes on a circle, which strips away cluster positioning but makes the internal edge structure easy to see. Certain arc regions have noticeably more crossing edges, corresponding to densely interconnected groups of articles.</p>
+
+          <div class="viz-grid wiki-reveal" style="transition-delay:50ms;">
+            <div class="viz-card" onclick="openLightbox('viz-alg1.png','Subgraph 1: Fruchterman-Reingold')">
+              <div class="viz-img-wrap"><img class="zoomable" src="viz-alg1.png" alt="Subgraph 1 Fruchterman-Reingold layout" /></div>
+              <div class="viz-label">Fruchterman-Reingold<span>Force-directed layout</span></div>
+            </div>
+            <div class="viz-card" onclick="openLightbox('viz-alg-2.png','Subgraph 1: Kamada-Kawai')">
+              <div class="viz-img-wrap"><img class="zoomable" src="viz-alg-2.png" alt="Subgraph 1 Kamada-Kawai layout" /></div>
+              <div class="viz-label">Kamada-Kawai<span>Graph distance matches geometry</span></div>
+            </div>
+            <div class="viz-card" onclick="openLightbox('viz-alg-3.png','Subgraph 1: Circular')">
+              <div class="viz-img-wrap"><img class="zoomable" src="viz-alg-3.png" alt="Subgraph 1 Circular layout" /></div>
+              <div class="viz-label">Circular<span>Nodes placed on a circle</span></div>
+            </div>
+          </div>
+
+          <!-- Category legend - compact -->
+          <div class="legend-compact wiki-reveal" style="transition-delay:30ms;" onclick="openLightbox('legend.png','Node Category Legend')">
+            <img src="legend.png" alt="Node category color legend" />
+          </div>
+
+          <!-- Community detection visualizations -->
+          <h3 class="wiki-sub-heading wiki-reveal">Community Detection Visualizations</h3>
+          <p class="wiki-body wiki-reveal">The three plots below show the same sub1 network with nodes colored by detected community membership. Each color represents a distinct community found by that algorithm, and the shaded hulls enclose nodes belonging to the same community, making the partition structure easy to see at a glance. All three algorithms find meaningful community structure, with modularity scores well above zero.</p>
+          <p class="wiki-body wiki-reveal" style="margin-top:12px;"><strong>Fast Greedy</strong> optimizes modularity directly by greedily merging communities, producing 68 communities at Q = 0.661. <strong>Louvain</strong> also optimizes modularity but uses an iterative local-move strategy that tends to find slightly better partitions, yielding 68 communities at Q = 0.663. The close agreement between these two, with the same number of communities and nearly identical Q values, suggests the partition is a robust feature of the network rather than an artifact of the algorithm. <strong>Walktrap</strong> takes a different approach based on random walks: nodes that are often visited together in short random walks are grouped into the same community. It produces more communities (77) at a lower Q (0.615), splitting some groups that Louvain and Fast Greedy keep unified. Louvain was selected as the primary algorithm based on its highest modularity score.</p>
+
+          <div class="viz-single wiki-reveal" style="transition-delay:50ms;" onclick="openLightbox('community-detection.png','Community Detection: Fast Greedy · Louvain · Walktrap')">
+            <img class="mc-img zoomable" src="community-detection.png" alt="Community detection comparison: Fast Greedy, Louvain, Walktrap" />
+            <div class="viz-single-label">Community Detection Comparison<span>Fast Greedy (Q=0.661) · Louvain (Q=0.663) · Walktrap (Q=0.615)</span></div>
+          </div>
+
+          <p class="wiki-body wiki-reveal" style="transition-delay:40ms; margin-top:8px;">
+            <strong>Louvain</strong> achieved the highest modularity (Q = 0.663) and was selected as the primary algorithm. Its agreement with Fast Greedy on both the number of communities and partition structure suggests these communities are robust features of the network topology. We verified stability by running Louvain on all four randomly sampled subgraphs.
+          </p>
+
+          <div class="wiki-table-wrap wiki-reveal" style="transition-delay:60ms; margin-top:22px;">
+            <table class="wiki-table">
+              <thead>
+                <tr><th>Subgraph</th><th>Nodes</th><th>Communities</th><th>Modularity</th><th>Density</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="node-name">sub1</td><td class="val-num">200</td><td class="val-num">68</td><td class="sub-mod">0.6620</td><td class="val-num">0.0060</td></tr>
+                <tr><td class="node-name">sub2</td><td class="val-num">200</td><td class="val-num">79</td><td class="sub-mod">0.6122</td><td class="val-num">0.0058</td></tr>
+                <tr><td class="node-name">sub3</td><td class="val-num">200</td><td class="val-num">72</td><td class="sub-mod">0.6520</td><td class="val-num">0.0061</td></tr>
+                <tr><td class="node-name">sub4</td><td class="val-num">200</td><td class="val-num">84</td><td class="sub-mod">0.6103</td><td class="val-num">0.0061</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="wiki-sub-heading wiki-reveal">Five Largest Louvain Communities (sub1)</h3>
+          <p class="wiki-body wiki-reveal">The detected communities cluster tightly along topical lines: science articles group with science, geography with geography. This is exactly what we would expect if Wikipedia's hyperlink structure encodes semantic similarity.</p>
+
+          <div class="community-list wiki-reveal" style="transition-delay:50ms;">
+            <div class="community-row">
+              <span class="comm-name">Community 4</span>
+              <span class="comm-size">23</span>
+              <div><span class="cat-pill cat-life">Everyday_life ×6</span><span class="cat-pill cat-sci">Science ×5</span><span class="cat-pill cat-geo">Geography ×4</span></div>
+              <span class="comm-sub">sub1</span>
+            </div>
+            <div class="community-row">
+              <span class="comm-name">Community 7</span>
+              <span class="comm-size">21</span>
+              <div><span class="cat-pill cat-geo">Geography ×10</span><span class="cat-pill cat-ppl">People ×4</span><span class="cat-pill cat-cit">Citizenship ×2</span></div>
+              <span class="comm-sub">sub1</span>
+            </div>
+            <div class="community-row">
+              <span class="comm-name">Community 8</span>
+              <span class="comm-size">17</span>
+              <div><span class="cat-pill cat-sci">Science ×13</span><span class="cat-pill cat-ppl">People ×3</span><span class="cat-pill cat-cit">Citizenship ×1</span></div>
+              <span class="comm-sub">sub1</span>
+            </div>
+            <div class="community-row">
+              <span class="comm-name">Community 3</span>
+              <span class="comm-size">14</span>
+              <div><span class="cat-pill cat-ppl">People ×5</span><span class="cat-pill cat-hist">History ×3</span><span class="cat-pill cat-geo">Geography ×2</span></div>
+              <span class="comm-sub">sub1</span>
+            </div>
+            <div class="community-row">
+              <span class="comm-name">Community 6</span>
+              <span class="comm-size">14</span>
+              <div><span class="cat-pill cat-ppl">People ×4</span><span class="cat-pill cat-cit">Citizenship ×3</span><span class="cat-pill cat-life">Everyday_life ×3</span></div>
+              <span class="comm-sub">sub1</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 MONTE CARLO -->
+    <section class="wiki-section">
+      <div class="container">
+        <div class="wiki-article">
+          <div class="wiki-section-header wiki-reveal">
+            <span class="wiki-section-num">05</span>
+            <h2 class="wiki-section-title">Monte Carlo Null Model Test</h2>
+          </div>
+          <p class="wiki-body wiki-reveal">
+            High modularity alone does not confirm significance; sparse random graphs can produce inflated Q values. To verify, we ran Louvain on the <strong>full undirected network</strong>, recorded its modularity, then generated <strong>1,000 Erdos-Renyi random graphs</strong> with identical node and edge counts and applied Louvain to each.
+          </p>
+
+          <div class="mc-wrap wiki-reveal" style="transition-delay:50ms;" onclick="openLightbox('mc-null-model.png','Monte Carlo Null Model: Modularity (Full Network)')">
+            <img class="mc-img zoomable" src="mc-null-model.png" alt="Monte Carlo Null Model: Modularity distribution, full network" />
+            <div class="mc-footer">
+              <div class="mc-footer-label">
+                Monte Carlo Null Model: Modularity (Full Network)
+                <span>1,000 Erdos-Renyi random graphs with same N and E as the full Wikispeedia network</span>
+              </div>
+              <div class="mc-badge">
+                <span class="mc-badge-val">p = 0</span>
+                <span class="mc-badge-label">Monte Carlo p-value</span>
+              </div>
+            </div>
+          </div>
+
+          <p class="wiki-body wiki-reveal">
+            None of the 1,000 random graphs came close to Q = 0.37. The observed value sits <strong>far beyond the right tail</strong> of the null distribution, yielding a Monte Carlo p-value of effectively zero. The community structure we detected is far stronger than chance alone can produce.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 RESULTS -->
+    <section class="wiki-section-alt">
+      <div class="container">
+        <div class="wiki-article">
+          <div class="wiki-section-header wiki-reveal">
+            <span class="wiki-section-num">06</span>
+            <h2 class="wiki-section-title">Results &amp; Conclusions</h2>
+          </div>
+          <p class="wiki-body wiki-reveal">
+            The Wikispeedia hyperlink graph exhibits the hallmarks of a real-world information network: sparse with density 0.00569, a <strong>heavy-tailed degree distribution</strong> where a few broad articles dominate, <strong>small-world properties</strong> with an average path length of just 3.18 hops, and well-defined topical communities that withstand statistical scrutiny.
+          </p>
+          <p class="wiki-body wiki-reveal" style="transition-delay:40ms; margin-top:14px;">
+            Three centrality measures (degree, betweenness, and eigenvector) consistently elevate the same core articles (United States, Europe, World War II) as the structural backbone. These are the nodes Wikispeedia players inevitably pass through regardless of their chosen route.
+          </p>
+          <p class="wiki-body wiki-reveal" style="transition-delay:80ms; margin-top:14px;">
+            Community detection with Louvain (Q = 0.3722 on the full network, p = 0 against 1,000 null graphs) confirmed that Wikipedia's hyperlink structure encodes genuine semantic organization. Reordering the adjacency matrix by community membership revealed clear block-diagonal structure, visually confirming the finding.
+          </p>
+          <div class="wiki-callout gold wiki-reveal" style="transition-delay:100ms; margin-top:28px;">
+            <p><strong>Future Directions:</strong> Incorporating the player navigation path data that ships with the Wikispeedia dataset would allow building a <em>weighted</em> network where edge weights reflect how frequently each link is actually clicked. This would reveal the gap between structurally available paths and the paths humans prefer. A configuration model null (preserving the degree sequence) would also provide a stricter significance test.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© 2026 Kian Jadbabaei</p>
+    </div>
+  </footer>
+
+  <!-- LIGHTBOX -->
+  <div class="lb-overlay" id="lbOverlay" onclick="closeLightbox(event)">
+    <div class="lb-box">
+      <button class="lb-close" onclick="closeLightbox(null)" aria-label="Close">✕</button>
+      <img class="lb-img" id="lbImg" src="" alt="" />
+      <div class="lb-caption" id="lbCaption"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const revealWiki = () => {
+      document.querySelectorAll('.wiki-reveal').forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add('visible');
+      });
+    };
+    window.addEventListener('scroll', revealWiki, { passive: true });
+    revealWiki();
+
+    function openLightbox(src, caption) {
+      document.getElementById('lbImg').src = src;
+      document.getElementById('lbCaption').textContent = caption || '';
+      document.getElementById('lbOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(e) {
+      if (e && e.target !== document.getElementById('lbOverlay') && !e.target.classList.contains('lb-close')) return;
+      if (e === null || e.target === document.getElementById('lbOverlay') || e.target.classList.contains('lb-close')) {
+        document.getElementById('lbOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { document.getElementById('lbOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+    });
+  </script>
+</body>
+</html>
