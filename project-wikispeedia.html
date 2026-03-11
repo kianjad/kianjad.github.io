@@ -464,7 +464,7 @@
             <h2 class="wiki-section-title">Overview</h2>
           </div>
           <p class="wiki-body wiki-reveal">
-            <strong>Wikispeedia</strong> is an online game created by Robert West and Jure Leskovec at Stanford where players navigate from one Wikipedia article to another using only embedded hyperlinks. The game runs on a condensed snapshot of Wikipedia: <em>4,604 articles</em> with over 119,000 hyperlinks. We treated this hyperlink structure as a <strong>directed network</strong> to study how information is organized and connected at scale.
+            <strong>Wikispeedia</strong> is an online game created by Robert West and Jure Leskovec at Stanford where players navigate from one Wikipedia article to another using only embedded hyperlinks. The game runs on a condensed snapshot of Wikipedia: 4,604 articles with over 119,000 hyperlinks. We treated this hyperlink structure as a <strong>directed network</strong> to study how information is organized and connected at scale.
           </p>
           <p class="wiki-body wiki-reveal" style="transition-delay:50ms;">
             Our analysis targeted four questions: how dense and connected is the network, which articles act as the most important structural hubs, do topically related articles cluster into communities, and is that community structure statistically meaningful rather than a product of random chance?
@@ -747,7 +747,7 @@
             Community detection with Louvain (Q = 0.3722 on the full network, p = 0 against 1,000 null graphs) confirmed that Wikipedia's hyperlink structure encodes genuine semantic organization. Reordering the adjacency matrix by community membership revealed clear block-diagonal structure, visually confirming the finding.
           </p>
           <div class="wiki-callout gold wiki-reveal" style="transition-delay:100ms; margin-top:28px;">
-            <p><strong>Future Directions:</strong> Incorporating the player navigation path data that ships with the Wikispeedia dataset would allow building a <em>weighted</em> network where edge weights reflect how frequently each link is actually clicked. This would reveal the gap between structurally available paths and the paths humans prefer. A configuration model null (preserving the degree sequence) would also provide a stricter significance test.</p>
+            <p><strong>Future Directions:</strong> Incorporating the player navigation path data that ships with the Wikispeedia dataset would allow building a weighted network where edge weights reflect how frequently each link is actually clicked. This would reveal the gap between structurally available paths and the paths humans prefer. A configuration model null (preserving the degree sequence) would also provide a stricter significance test.</p>
           </div>
         </div>
       </div>
